@@ -1,0 +1,73 @@
+<div id="action-recognition-labeling">
+    <sly-style>
+        #action-recognition-labeling .custom-sly-card-border-radius {
+        border-radius: 35px;
+        padding: 18px 24px;
+        }
+
+        #action-recognition-labeling .beautiful-table {
+        border-collapse: collapse;
+        overflow-x: scroll;
+
+        }
+        #action-recognition-labeling .beautiful-table tr:nth-child(2n) { background-color: #f6f8fa; }
+        #action-recognition-labeling .beautiful-table td, .beautiful-table th {
+        border: 1px solid #dfe2e5;
+        padding: 6px 13px;
+        text-align: center;
+        line-height: 20px;
+        }
+        #action-recognition-labeling .beautiful-table.al td, .beautiful-table.al th {
+        text-align: left;
+        }
+
+
+        #action-recognition-labeling .disable_overflow_by_x_for_table .el-table__body-wrapper {
+        overflow-x:hidden;
+        }
+
+        #action-recognition-labeling .hide-percentage-from-progress .el-progress__text {
+        display: none;
+        }
+
+
+        #action-recognition-labeling .custom-collapse {
+        cursor:pointer;
+        transition: all 0.2s;
+
+
+        }
+
+        #action-recognition-labeling .custom-collapse:hover {
+
+        color: #039aff;
+        }
+
+        #action-recognition-labeling .div-without-paddings .content {
+        padding:0 0;
+
+        }
+
+
+
+    </sly-style>
+
+    {% include 'src/ui/connect_to_controller.html' %}
+
+    <el-dialog
+            title="Restart from this step"
+            :visible.sync="state.restartFrom"
+            size="tiny">
+        <span>This step and all next steps will be reseted</span>
+        <span slot="footer" class="dialog-footer">
+            <el-button @click="state.restartFrom = null">Cancel</el-button>
+            <!--        $nextTick(() => { $refs['card3'].$el.scrollIntoView({behavior: 'smooth', block: 'center'}); });-->
+            <el-button type="primary" class="regular"
+                       @click="command('restart');">
+                Confirm
+            </el-button>
+        </span>
+    </el-dialog>
+
+
+</div>

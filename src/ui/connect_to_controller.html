@@ -1,0 +1,112 @@
+<sly-card class="custom-sly-card-border-radius ">
+    <div class="fflex" style=" flex-direction: row; align-items: flex-start; justify-content: flex-start;">
+        <div>
+            <sly-field title="Connect Status"
+                       description="annotation controller connection"
+                       style=""
+            >
+
+                <sly-icon
+                        v-if="!state.controllerConnected"
+                        slot="icon" :options="{ color: '#ffffff', bgColor: '#fe5a1d', rounded: false }">
+                    <i class="zmdi zmdi-memory"></i>
+                </sly-icon>
+                <sly-icon
+                        v-else
+                        slot="icon" :options="{ color: '#ffffff', bgColor: '#51c21d', rounded: false }">
+                    <i class="zmdi zmdi-memory"></i>
+                </sly-icon>
+            </sly-field>
+            <div
+                    v-if="!state.controllerConnected"
+                    class="fflex" style="overflow: hidden">
+                <sly-select-app-session :group-id="data.teamId"
+                                        :app-session-id.sync="state.annControllerId"
+                                        :options="data.ssOptionsAnnotationController"
+                                        :disabled="false">
+                </sly-select-app-session>
+                <el-button class="ml10 regular"
+                           style="width: 120px"
+                           type="primary"
+                           size="small"
+                           :disabled="false"
+                           :loading="state.connectingAnnotationController"
+                           @click="state.connectingAnnotationController=true; command('connect_to_controller');"
+                >
+                    connect
+                </el-button>
+            </div>
+            <div v-else style="margin-top: 10px">
+
+
+                <div style="border-left: 2px solid #00bb00; padding: 0 8px">
+
+                    <div v-for="v,k in data.connectedData" class="mb10"
+                         style="word-break: break-all;">
+
+                        <div v-if="v" style="margin-bottom: 4px">
+                            <b>{{k}}</b>: <span>{{v}}</span>
+                        </div>
+                    </div>
+                </div>
+
+
+            </div>
+        </div>
+
+        <div v-if="state.controllerConnected"
+             class="fflex"
+             style="margin-left: 20px; flex-direction: column; align-items: flex-start; justify-content: flex-start">
+            <sly-field title="Statistics"
+                       description="your stats for this session"
+                       style=""
+            >
+
+                <sly-icon
+                        slot="icon" :options="{ color: 'white', bgColor: 'gold', rounded: false }">
+                    <i class="zmdi zmdi-star"></i>
+                </sly-icon>
+            </sly-field>
+
+            <div style="border-left: 2px solid gold; padding: 0 8px">
+
+                <div v-for="v,k in data.userStats" class="mb10"
+                     style="word-break: break-all;">
+
+                    <div v-if="v" style="margin-bottom: 4px">
+                        <b>{{k}}</b>: <span>{{v}}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+        <div v-if="state.controllerConnected"
+             class="fflex"
+             style="margin-left: 20px; flex-direction: column; align-items: flex-start; justify-content: flex-start">
+            <sly-field
+                    title="Preferences"
+                    description="application preferences"
+                    style=""
+            >
+                <sly-icon slot="icon" :options="{ color: '#ffffff', bgColor: '#1fa0ff', rounded: false }">
+                    <i class="zmdi zmdi-settings"></i>
+
+                </sly-icon>
+            </sly-field>
+            <div class="fflex"
+                 style="padding: 0 8px; flex-direction: row; align-items: center; justify-content: flex-start;
+               border-left: 2px solid #1fa0ff;">
+                <div style="font-size: 14px; margin-right: 5px; font-weight: 500">Selected Mode:</div>
+                <el-radio-group v-model="state.userMode" size="small">
+                    <el-radio-button label="annotator"
+                                     :disabled="!state.userAvailableMods.includes('annotator')"></el-radio-button>
+                    <el-radio-button label="reviewer"
+                                     :disabled="!state.userAvailableMods.includes('reviewer')"></el-radio-button>
+                </el-radio-group>
+
+
+            </div>
+        </div>
+    </div>
+</sly-card>
