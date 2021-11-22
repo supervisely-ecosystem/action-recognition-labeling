@@ -21,8 +21,16 @@ def main():
     g.my_app.run(data=data, state=state)
 
 
-#  @TODO: publish API method video.add_tag
-#  @TODO: publish update_fields decorator
+@g.my_app.callback("is_online")
+@sly.timeit
+@g.update_fields
+def is_online(api: sly.Api, task_id, context, state, app_logger, fields_to_update):
+    try:
+        request_id = context["request_id"]
+        g.my_app.send_response(request_id, data={})
+    except:
+        pass
+
 
 if __name__ == "__main__":
     sly.main_wrapper("main", main)

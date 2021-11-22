@@ -1,7 +1,7 @@
-<sly-card class="custom-sly-card-border-radius ">
+<sly-card class="custom-sly-card-border-radius " style="padding: 18px 25px">
     <div class="fflex" style=" flex-direction: row; align-items: flex-start; justify-content: flex-start;">
         <div>
-            <sly-field title="Connect Status"
+            <sly-field title="Connection Status"
                        description="annotation controller connection"
                        style=""
             >
@@ -39,12 +39,12 @@
             <div v-else style="margin-top: 10px">
 
 
-                <div style="border-left: 2px solid #00bb00; padding: 0 8px">
+                <div style="border-left: 2px solid #00bb00; padding: 2px 8px">
 
-                    <div v-for="v,k in data.connectedData" class="mb10"
+                    <div v-for="v,k in data.connectedData" class=""
                          style="word-break: break-all;">
 
-                        <div v-if="v" style="margin-bottom: 4px">
+                        <div v-if="v" style="margin: 8px 0">
                             <b>{{k}}</b>: <span>{{v}}</span>
                         </div>
                     </div>
@@ -56,7 +56,7 @@
 
         <div v-if="state.controllerConnected"
              class="fflex"
-             style="margin-left: 20px; flex-direction: column; align-items: flex-start; justify-content: flex-start">
+             style="margin-left: 25px; flex-direction: column; align-items: flex-start; justify-content: flex-start">
             <sly-field title="Statistics"
                        description="your stats for this session"
                        style=""
@@ -68,14 +68,16 @@
                 </sly-icon>
             </sly-field>
 
-            <div style="border-left: 2px solid gold; padding: 0 8px">
+            <div style="border-left: 2px solid gold; padding: 2px 8px">
 
-                <div v-for="v,k in data.userStats" class="mb10"
+                <div v-for="v,k in data.userStats"
                      style="word-break: break-all;">
 
-                    <div v-if="v" style="margin-bottom: 4px">
+                    <div v-if="v" style="margin: 8px 0">
                         <b>{{k}}</b>: <span>{{v}}</span>
                     </div>
+
+
                 </div>
             </div>
         </div>
@@ -83,7 +85,7 @@
 
         <div v-if="state.controllerConnected"
              class="fflex"
-             style="margin-left: 20px; flex-direction: column; align-items: flex-start; justify-content: flex-start">
+             style="margin-left: 25px; flex-direction: column; align-items: flex-start; justify-content: flex-start">
             <sly-field
                     title="Preferences"
                     description="application preferences"
@@ -95,7 +97,7 @@
                 </sly-icon>
             </sly-field>
             <div class="fflex"
-                 style="padding: 0 8px; flex-direction: row; align-items: center; justify-content: flex-start;
+                 style="padding: 2px 8px; flex-direction: row; align-items: center; justify-content: flex-start;
                border-left: 2px solid #1fa0ff;">
                 <div style="font-size: 14px; margin-right: 5px; font-weight: 500">Selected Mode:</div>
                 <el-radio-group v-model="state.userMode" size="small">

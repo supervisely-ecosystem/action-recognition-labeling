@@ -28,25 +28,19 @@ def init_fields(state, data):
         'Session ID': None,
         'Admin Nickname': None,
         'Uptime': None,
-        'Videos Available': None
+        'Videos Available': None,
+        'Videos for Annotation': None,
+        'Videos for Review': None
     }
 
     data['userStats'] = {
         'Videos Annotated': '0',
         'Tags Added': '0',
-        'Tags Changed': '0'
+        'Tags Changed': '0',
+        'Time in Work': '00:00:00'
     }
 
 
-@g.my_app.callback("is_online")
-@sly.timeit
-@g.update_fields
-def is_online(api: sly.Api, task_id, context, state, app_logger, fields_to_update):
-    try:
-        request_id = context["request_id"]
-        g.my_app.send_response(request_id, data={})
-    except:
-        pass
 
 
 @g.my_app.callback("connect_to_controller")
@@ -79,11 +73,11 @@ def connect_to_controller(api: sly.Api, task_id, context, state, app_logger, fie
         fields_to_update['state.controllerConnected'] = True
 
         connected_data = {
-
             'Status': "Connected",
             'Session ID': g.controller_session_id,
-            'Admin Nickname': None,
-            'Videos Available': None
+            'Admin Nickname': response.get('admin_nickname', None),
+            'Videos for Annotation': response.get('items_for_annotation_count', None),
+            'Videos for Review': response.get('items_for_review_count', None)
         }
 
         fields_to_update['data.connectedData'] = connected_data

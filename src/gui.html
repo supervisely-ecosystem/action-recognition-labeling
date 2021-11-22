@@ -47,27 +47,12 @@
         padding:0 0;
 
         }
-
-
-
     </sly-style>
 
     {% include 'src/ui/connect_to_controller.html' %}
+    {% include 'src/ui/control_board.html' %}
 
-    <el-dialog
-            title="Restart from this step"
-            :visible.sync="state.restartFrom"
-            size="tiny">
-        <span>This step and all next steps will be reseted</span>
-        <span slot="footer" class="dialog-footer">
-            <el-button @click="state.restartFrom = null">Cancel</el-button>
-            <!--        $nextTick(() => { $refs['card3'].$el.scrollIntoView({behavior: 'smooth', block: 'center'}); });-->
-            <el-button type="primary" class="regular"
-                       @click="command('restart');">
-                Confirm
-            </el-button>
-        </span>
-    </el-dialog>
+
 
 
 </div>
