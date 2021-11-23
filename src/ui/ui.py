@@ -5,6 +5,7 @@ import connect_to_controller
 import control_board
 import video_player
 import labeling_tool
+import timeline
 
 
 @sly.timeit
@@ -21,6 +22,7 @@ def init(state, data):
     control_board.init_fields(state=state, data=data)
     video_player.init_fields(state=state, data=data)
     labeling_tool.init_fields(state=state, data=data)
+    timeline.init_fields(state=state, data=data)
 
 
 

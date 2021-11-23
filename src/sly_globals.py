@@ -46,6 +46,12 @@ tags_on_video = {}
 project_id = None
 project_meta = None
 
+user_stats = {
+    'annotated_frames': set([]),
+    'tags_created': 0
+}
+
+tag_frame_ranges = {}
 
 technical_tags_names = [ItemsStatusField.TAG_NAME]
 

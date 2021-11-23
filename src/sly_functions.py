@@ -1,4 +1,5 @@
 import datetime
+from string import Formatter
 
 import sly_globals as g
 
@@ -39,3 +40,22 @@ def get_project_meta(api, video_id):
 def get_available_tags(api, video_id):
     project_meta = get_project_meta(api, video_id)  # use to unpack available tags
     return project_meta.get('tags', [])
+
+
+def strfdelta(tdelta, fmt):
+    f = Formatter()
+    d = {}
+    l = {'D': 86400, 'H': 3600, 'M': 60, 'S': 1}
+    k = list(map(lambda x: x[1], list(f.parse(fmt))))
+    rem = int(tdelta.total_seconds())
+
+    for i in ('D', 'H', 'M', 'S'):
+        if i in k and i in l.keys():
+            d[i], rem = divmod(rem, l[i])
+
+    return f.format(fmt, **d)
+
+
+def get_datetime_by_unix(unix_time_delta):
+    delta_obj = datetime.timedelta(seconds=round(unix_time_delta))
+    return strfdelta(delta_obj, "{H:02}:{M:02}:{S:02}")

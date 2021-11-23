@@ -4,6 +4,8 @@ import json
 import sly_globals as g
 import supervisely_lib as sly
 
+import sly_functions as f
+
 
 def init_fields(state, data):
     state['userMode'] = None
@@ -34,10 +36,9 @@ def init_fields(state, data):
     }
 
     data['userStats'] = {
-        'Videos Annotated': '0',
-        'Tags Added': '0',
-        'Tags Changed': '0',
-        'Time in Work': '00:00:00'
+        'Videos Annotated': None,
+        'Tags Created': None,
+        'Time in Work': None
     }
 
 
@@ -77,6 +78,16 @@ def connect_to_controller(api: sly.Api, task_id, context, state, app_logger, fie
             'Videos for Annotation': response.get('items_for_annotation_count', None),
             'Videos for Review': response.get('items_for_review_count', None)
         }
+
+        if response.get('user_stats'):
+            user_stats = {
+                'Videos Annotated': response['user_stats'].get('items_annotated', 0),
+                'Frames Annotated': response['user_stats'].get('frames_annotated', 0),
+                'Tags Created': response['user_stats'].get('tags_created', 0),
+                'Time in Work': f.get_datetime_by_unix(response['user_stats'].get('work_time'))
+                if response['user_stats'].get('work_time') is not None else f.get_datetime_by_unix(0)
+            }
+            fields_to_update['data.userStats'] = user_stats
 
         fields_to_update['data.connectedData'] = connected_data
 

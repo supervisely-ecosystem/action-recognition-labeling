@@ -44,7 +44,7 @@
                     <div v-for="v,k in data.connectedData" class=""
                          style="word-break: break-all;">
 
-                        <div v-if="v" style="margin: 8px 0">
+                        <div v-if="v != null" style="margin: 8px 0">
                             <b>{{k}}</b>: <span>{{v}}</span>
                         </div>
                     </div>
@@ -73,7 +73,7 @@
                 <div v-for="v,k in data.userStats"
                      style="word-break: break-all;">
 
-                    <div v-if="v" style="margin: 8px 0">
+                    <div v-if="v != null" style="margin: 8px 0">
                         <b>{{k}}</b>: <span>{{v}}</span>
                     </div>
 

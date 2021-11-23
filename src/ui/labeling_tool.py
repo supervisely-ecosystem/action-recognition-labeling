@@ -48,7 +48,7 @@ def update_tag_locally(current_frame, updated_tag):
                 tags_on_frame.pop(tag_index)
             break
     else:
-        if len(updated_tag['selected_value']) > 0:
+        if updated_tag['selected_value'] is not None and len(updated_tag['selected_value']) > 0:
             tags_on_frame.append(create_sly_tag(updated_tag))
 
     g.tags_on_video['frames'][current_frame] = tags_on_frame
@@ -74,6 +74,8 @@ def update_tab_by_name(tab_name, current_frame=0):
 
         g.api.app.set_field(g.task_id, f'state.{state_name}', tab_content)
 
+    return tab_content
+
 
 @g.my_app.callback("clean_values")
 @sly.timeit
@@ -92,19 +94,34 @@ def clean_values(api: sly.Api, task_id, context, state, app_logger, fields_to_up
 @g.my_app.callback("frame_tag_updated")
 @sly.timeit
 @g.update_fields
-@g.my_app.ignore_errors_and_show_dialog_window()
+# @g.my_app.ignore_errors_and_show_dialog_window()
 def frame_tag_updated(api: sly.Api, task_id, context, state, app_logger, fields_to_update):
     if state['updatedTag'].get('selected_value', None) is not None:
         fields_to_update['state.lastAnnotatedFrame'] = state['currentFrame']
         update_tag_locally(state['currentFrame'], state['updatedTag'])
 
+        g.user_stats['tags_created'] += 1
+
+        g.user_stats['annotated_frames'].add(state['currentFrame'])  # MOVE TO SEP FUNC
+        fields_to_update['state.currentJobInfo.framesAnnotated'] = len(g.user_stats['annotated_frames'])
+        fields_to_update['state.currentJobInfo.tagsCreated'] = g.user_stats['tags_created']
+
 
 @g.my_app.callback("copy_from_preview")
 @sly.timeit
 @g.update_fields
-@g.my_app.ignore_errors_and_show_dialog_window()
+# @g.my_app.ignore_errors_and_show_dialog_window()
 def copy_from_preview(api: sly.Api, task_id, context, state, app_logger, fields_to_update):
     fields_to_update['state.buttonsLoading.copyValuesFromPreview'] = False
-    update_tab_by_name('frames', current_frame=state['lastAnnotatedFrame'])
+
+    tags_on_card = update_tab_by_name('frames', current_frame=state['lastAnnotatedFrame'])
+
+    for tag in tags_on_card:
+        update_tag_locally(state['currentFrame'], tag)
+        g.user_stats['tags_created'] += 1
+
+    g.user_stats['annotated_frames'].add(state['currentFrame'])  # MOVE TO SEP FUNC
+    fields_to_update['state.currentJobInfo.framesAnnotated'] = len(g.user_stats['annotated_frames'])
+    fields_to_update['state.currentJobInfo.tagsCreated'] = g.user_stats['tags_created']
 
 

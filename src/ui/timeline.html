@@ -1,0 +1,38 @@
+<sly-card class="custom-sly-card-border-radius"
+          style="margin: 5px 0; padding: 16px 25px; padding-bottom: 10px; width: 100%;">
+    <sly-field title="Timeline"
+               description="tags on timeline"
+               style="width: 100%; margin-bottom: 0"
+               class="mt10">
+
+        <div v-if="data.timelineTags" style="overflow-x: hidden; padding-top: 10px">
+
+            <div v-for="v, k in data.timelineTags">
+                <div class="fflex"
+                     style="flex-direction:row; justify-content: space-between; align-items: center;">
+<!--                    <div style="flex-direction: row; align-items: center; justify-content: center">-->
+<!--                        <span style="white-space: nowrap; text-overflow: ellipsis; font-size: 13px">-->
+<!--                            <b>{{k}}</b>-->
+<!--                        </span>-->
+<!--                    </div>-->
+                    <sly-timeline
+                            style="width: 100%; height: 25px"
+                            :framesCount="data.videoInfo.frames_count"
+                            :intervals="v.ranges"
+                            :colors="v.color"
+                            :pointer.sync="state.currentFrame"
+                            @update:pointer="command('pointer_updated')"
+                            @segment-selected="val => state.selectedSegment = val">
+                        <template slot-scope="{ activeInterval }">
+                        <span v-if="activeInterval">
+                            <span>{{ activeInterval.interval[0] }} - {{ activeInterval.interval[1] }}</span>
+                        </span>
+                        </template>
+                    </sly-timeline>
+                </div>
+            </div>
+        </div>
+
+    </sly-field>
+</sly-card>
+
