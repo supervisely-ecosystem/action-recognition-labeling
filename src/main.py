@@ -34,6 +34,7 @@ def is_online(api: sly.Api, task_id, context, state, app_logger, fields_to_updat
 
 # @TODO: add save annotations button logic
 # @TODO: add finish labeling button logic
+# @TODO: tag multiselect question
 
 if __name__ == "__main__":
     sly.main_wrapper("main", main)

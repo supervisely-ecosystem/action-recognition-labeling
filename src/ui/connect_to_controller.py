@@ -41,8 +41,6 @@ def init_fields(state, data):
     }
 
 
-
-
 @g.my_app.callback("connect_to_controller")
 @sly.timeit
 @g.update_fields

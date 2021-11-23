@@ -6,6 +6,7 @@ import sys
 import pickle
 
 import supervisely_lib as sly
+from sly_fields_names import ItemsStatusField
 
 import sly_functions as f
 
@@ -39,7 +40,14 @@ ui_sources_dir = os.path.join(source_path, "ui")  # /annotation-controller/src/u
 sly.logger.info(f"UI source directory: {ui_sources_dir}")
 sys.path.append(ui_sources_dir)
 
-annotation_controller_status_tag_name = 'annotation_controller_status_tag'
+available_tags = {}
+tags_on_video = {}
+
+project_id = None
+project_meta = None
+
+
+technical_tags_names = [ItemsStatusField.TAG_NAME]
 
 
 def update_fields(func):
