@@ -38,7 +38,9 @@ def init_fields(state, data):
     data['userStats'] = {
         'Videos Annotated': None,
         'Tags Created': None,
-        'Time in Work': None
+        'Time in Work': None,
+        'Frames Annotated': None,
+        'Unsaved Tags': 0
     }
 
 
@@ -87,7 +89,9 @@ def connect_to_controller(api: sly.Api, task_id, context, state, app_logger, fie
                 'Time in Work': f.get_datetime_by_unix(response['user_stats'].get('work_time'))
                 if response['user_stats'].get('work_time') is not None else f.get_datetime_by_unix(0)
             }
-            fields_to_update['data.userStats'] = user_stats
+
+            for key, value in user_stats.items():
+                fields_to_update[f'data.userStats.{key}'] = value
 
         fields_to_update['data.connectedData'] = connected_data
 

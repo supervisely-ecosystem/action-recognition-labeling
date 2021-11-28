@@ -1,54 +1,65 @@
 <sly-card class="custom-sly-card-border-radius"
           style="margin: 5px 0; padding: 16px 25px; padding-bottom: 2px; width: 100%; height: 100%; justify-content: center">
-    <sly-field title="Labeling Tool"
-               description="add / change / remove tags"
-               style="width: 100%"
-               class="mt10"
-    >
 
-        <div style="font-size: 16px; padding-top: 7px">
-            <el-tabs v-model="state.selectedTagMode">
-                <el-tab-pane label="FRAME TAGS" name="frames">
+    <div style="display: flex; flex-direction: row; align-items: center; justify-content: space-between;">
+        <sly-field title="Labeling Tool"
+                   description="add / change / remove tags"
+                   style="width: 100%"
+                   class="mt10"></sly-field>
 
-                    <div v-if="state.tagsOnFrame.length > 0">
 
-                        <div class="fflex" style="justify-content: space-between; margin-bottom: 14px; width: 100%">
-                            <div class="fflex" style="justify-content: center; flex-direction: column">
+        <span style="font-size: 26px; font-weight: 500; margin-bottom: 12px;">{{state.currentFrame}}</span>
 
-                                <el-button type="primary"
-                                           size="small"
-                                           class="regular"
-                                           :disabled="state.lastAnnotatedFrame == null"
-                                           style="width: 140px; margin: 2px 0"
-                                           :loading="state.buttonsLoading['copyValuesFromPreview']"
-                                           @click="state.buttonsLoading['copyValuesFromPreview']=true; command('copy_from_preview');">
-                                    FROM PREV <i class="zmdi zmdi-redo ml5" style="color: white"></i>
-                                </el-button>
-                            </div>
-                            <div class="fflex" style="justify-content: center; flex-direction: column">
+    </div>
+    <!--    <hr class="" style="border: 0; margin: 0 0; border-top: 1px solid rgba(0,0,0,.12);"/>-->
 
-                                <el-button type="danger"
-                                           size="small"
-                                           class="regular"
-                                           style="width: 140px; margin: 2px 0"
-                                           :loading="state.buttonsLoading['cleanAllValues']"
-                                           @click="state.buttonsLoading['cleanAllValues']=true; command('clean_values');">
+    <div style="font-size: 16px; padding-bottom: 10px">
+        <el-tabs v-model="state.selectedTagMode" type="card">
+            <el-tab-pane label="FRAME TAGS" name="frames">
 
-                                    CLEAN ALL <i class="zmdi zmdi-label-alt-outline ml5" style="color: white"></i>
-                                </el-button>
-                            </div>
+                <div v-if="state.tagsOnFrame.length > 0">
+
+                    <div class="fflex" style="justify-content: space-between; margin-bottom: 14px; width: 100%">
+                        <div class="fflex" style="justify-content: center; flex-direction: column">
+
+                            <el-button
+                                    :plain="true"
+
+                                    size="small"
+                                    class="regular copy-button-style black-to-gold-style"
+                                    :style="[state.copyFromPrevActivated ? {'color': '#f8ba29', 'border': '1px solid #f8ba29'} : {'color': 'black', 'border': '1px solid #c4c4c4'}]"
+
+
+                                    @click="state.copyFromPrevActivated=!state.copyFromPrevActivated; state.lastAnnotatedFrame=state.currentFrame">
+                                FROM PREV <i class="zmdi zmdi-redo ml5"></i>
+                            </el-button>
                         </div>
+                        <div class="fflex" style="justify-content: center; flex-direction: column">
 
-                        <div v-for="current_tag in state.tagsOnFrame">
-                            <div style="display: flex; flex-direction: row; align-items: center; justify-content: space-between">
-                            <span style="overflow-x: hidden; white-space: nowrap; text-overflow: ellipsis; font-size: 13px">
+                            <el-button type="danger"
+                                       size="small"
+                                       class="regular"
+                                       style="width: 140px; margin: 2px 0"
+
+                                       @click="state.buttonsLoading['cleanAllValues']=true; command('clean_values');">
+
+                                CLEAN FRAME <i class="zmdi zmdi-label-alt-outline ml5" style="color: white"></i>
+                            </el-button>
+                        </div>
+                    </div>
+
+                    <div v-for="current_tag in state.tagsOnFrame">
+                        <div style="padding-top: 2px; display: flex; flex-direction: row; align-items: center; justify-content: space-between">
+                            <span style="padding-top: 2px; overflow-x: hidden; white-space: nowrap; text-overflow: ellipsis; font-size: 13px">
                                 <i class="zmdi zmdi-circle mr5" :style="{color: current_tag.color}"></i> {{current_tag.name}}
                             </span>
+                            <div style="display: flex; flex-direction: row; align-items: center; justify-content: flex-end">
                                 <el-select v-model="current_tag.selected_value"
                                            size="small"
                                            clearable
                                            placeholder="not selected"
-                                           @visible-change="state.updatedTag=current_tag; command('frame_tag_updated')"
+                                           @change="state.updatedTag=current_tag; command('frame_tag_updated')"
+                                           @visible-change="state.visibleChange=true"
                                            @clear="state.updatedTag=current_tag; command('frame_tag_updated')"
                                 >
                                     <el-option
@@ -57,71 +68,87 @@
                                             :value="current_key">
                                     </el-option>
                                 </el-select>
+                                <div v-if="current_tag.updated">
+                                    <div style="border-right: 6px solid #f8ba29; margin-left: 2px;">&nbsp;</div>
+                                </div>
+                                <div v-else>
+                                    <div style="border-right: 6px solid gray; margin-left: 2px;">&nbsp;</div>
+                                </div>
                             </div>
-
-                            <hr v-if="current_tag != state.tagsOnFrame[state.tagsOnFrame.length - 1]"
-                                style="border: 0; margin: 6px 0; border-top: 2px dashed rgba(0,0,0,.12);"/>
-
                         </div>
-                    </div>
-                    <div v-else>
-                        <sly-field v-else
-                                   title="INFO: Tags List is Empty"
-                                   description="there is no tags available"
-                                   style="margin-bottom: 0"
-                        >
-                            <sly-icon slot="icon" :options="{ color: '#4c9ef8', bgColor: '#e3f0ff', rounded: false }">
-                                <i class="zmdi zmdi-info"></I>
-                            </sly-icon>
-                        </sly-field>
+
+                        <hr v-if="current_tag != state.tagsOnFrame[state.tagsOnFrame.length - 1]"
+                            style="border: 0; margin: 6px 0; border-top: 2px dashed rgba(0,0,0,.12);"/>
 
                     </div>
-                </el-tab-pane>
-                <el-tab-pane label="VIDEO TAGS" name="videos">
+                </div>
+                <div v-else>
+                    <sly-field v-else
+                               title="INFO: Tags List is Empty"
+                               description="there is no tags available"
+                               style="margin-bottom: 0"
+                    >
+                        <sly-icon slot="icon" :options="{ color: '#4c9ef8', bgColor: '#e3f0ff', rounded: false }">
+                            <i class="zmdi zmdi-info"></I>
+                        </sly-icon>
+                    </sly-field>
+
+                </div>
+            </el-tab-pane>
+            <el-tab-pane label="VIDEO TAGS" name="videos">
+
+                <div v-if="state.tagsOnVideo.length > 0">
+
                     <div v-for="current_tag in state.tagsOnVideo">
-                        <div v-if="state.tagsOnVideo.length > 0">
-
-                            <div v-for="current_tag in state.tagsOnVideo">
-                                <div style="display: flex; flex-direction: row; align-items: center; justify-content: space-between">
+                        <div style="display: flex; flex-direction: row; align-items: center; justify-content: space-between"
+                        >
                             <span style="overflow-x: hidden; white-space: nowrap; text-overflow: ellipsis; font-size: 13px">
                                 <i class="zmdi zmdi-circle mr5" :style="{color: current_tag.color}"></i> {{current_tag.name}}
                             </span>
-                                    <el-select v-model="current_tag.selected_value"
-                                               size="small"
-                                               clearable
-                                               placeholder="not selected"
-                                    >
-                                        <el-option
-                                                v-for="current_key in current_tag.available_values"
-                                                :label="current_key"
-                                                :value="current_key">
-                                        </el-option>
-                                    </el-select>
+                            <div style="display: flex; flex-direction: row; align-items: center; justify-content: flex-end">
+                                <el-select v-model="current_tag.selected_value"
+                                           size="small"
+                                           clearable
+                                           placeholder="not selected">
+                                    <el-option
+                                            v-for="current_key in current_tag.available_values"
+                                            :label="current_key"
+                                            :value="current_key">
+                                    </el-option>
+                                </el-select>
+
+                                <div v-if="current_tag.updated">
+                                    <div style="border-right: 6px solid gold; margin-left: 2px;">&nbsp;</div>
                                 </div>
-
-                                <hr v-if="current_tag != state.tagsOnVideo[state.tagsOnVideo.length - 1]"
-                                    style="border: 0; margin: 6px 0; border-top: 2px dashed rgba(0,0,0,.12);"/>
-
+                                <div v-else>
+                                    <div style="border-right: 6px solid gray; margin-left: 2px;">&nbsp;</div>
+                                </div>
                             </div>
                         </div>
-                        <div v-else>
-                            <sly-field v-else
-                                       title="INFO: Tags List is Empty"
-                                       description="there is no tags available"
-                                       style="margin-bottom: 0"
-                            >
-                                <sly-icon slot="icon"
-                                          :options="{ color: '#4c9ef8', bgColor: '#e3f0ff', rounded: false }">
-                                    <i class="zmdi zmdi-info"></I>
-                                </sly-icon>
-                            </sly-field>
 
-                        </div>
+                        <hr v-if="current_tag != state.tagsOnVideo[state.tagsOnVideo.length - 1]"
+                            style="border: 0; margin: 6px 0; border-top: 2px dashed rgba(0,0,0,.12);"/>
+
                     </div>
-                </el-tab-pane>
-            </el-tabs>
+                </div>
+                <div v-else>
+                    <sly-field v-else
+                               title="INFO: Tags List is Empty"
+                               description="there is no tags available"
+                               style="margin-bottom: 0"
+                    >
+                        <sly-icon slot="icon"
+                                  :options="{ color: '#4c9ef8', bgColor: '#e3f0ff', rounded: false }">
+                            <i class="zmdi zmdi-info"></I>
+                        </sly-icon>
+                    </sly-field>
 
-        </div>
-    </sly-field>
+                </div>
+
+            </el-tab-pane>
+        </el-tabs>
+
+    </div>
+
 </sly-card>
 

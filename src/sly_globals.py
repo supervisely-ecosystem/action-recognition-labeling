@@ -40,10 +40,11 @@ ui_sources_dir = os.path.join(source_path, "ui")  # /annotation-controller/src/u
 sly.logger.info(f"UI source directory: {ui_sources_dir}")
 sys.path.append(ui_sources_dir)
 
-available_tags = {}
-tags_on_video = {}
+tags2stats = {}
+updated_tags = {}
 
 project_id = None
+video_id = None
 project_meta = None
 
 user_stats = {
@@ -61,7 +62,9 @@ def update_fields(func):
 
     @functools.wraps(func)
     def wrapper_updater(*args, **kwargs):
-        kwargs['fields_to_update'] = {}
+        if kwargs.get('fields_to_update', None) is None:
+            kwargs['fields_to_update'] = {}
+
         exception = None
 
         try:

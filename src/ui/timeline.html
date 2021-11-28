@@ -1,38 +1,71 @@
 <sly-card class="custom-sly-card-border-radius"
-          style="margin: 5px 0; padding: 16px 25px; padding-bottom: 10px; width: 100%;">
-    <sly-field title="Timeline"
-               description="tags on timeline"
-               style="width: 100%; margin-bottom: 0"
-               class="mt10">
+          style="margin: 5px 0; padding: 16px 0; padding-bottom: 10px; width: 100%;">
 
-        <div v-if="data.timelineTags" style="overflow-x: hidden; padding-top: 10px">
 
-            <div v-for="v, k in data.timelineTags">
-                <div class="fflex"
-                     style="flex-direction:row; justify-content: space-between; align-items: center;">
-<!--                    <div style="flex-direction: row; align-items: center; justify-content: center">-->
-<!--                        <span style="white-space: nowrap; text-overflow: ellipsis; font-size: 13px">-->
-<!--                            <b>{{k}}</b>-->
-<!--                        </span>-->
-<!--                    </div>-->
-                    <sly-timeline
-                            style="width: 100%; height: 25px"
-                            :framesCount="data.videoInfo.frames_count"
-                            :intervals="v.ranges"
-                            :colors="v.color"
-                            :pointer.sync="state.currentFrame"
-                            @update:pointer="command('pointer_updated')"
-                            @segment-selected="val => state.selectedSegment = val">
-                        <template slot-scope="{ activeInterval }">
-                        <span v-if="activeInterval">
-                            <span>{{ activeInterval.interval[0] }} - {{ activeInterval.interval[1] }}</span>
-                        </span>
-                        </template>
-                    </sly-timeline>
-                </div>
+    <div style="display: flex; flex-direction: row; align-items: center; justify-content: space-between;">
+        <sly-field title="Timeline"
+                   description="tags on timeline"
+                   style="margin-bottom: 0; margin-left: 20px"
+                   class="mt10">
+        </sly-field>
+
+        <div class="fflex mt5"
+             style="padding: 2px 14px; flex-direction: row; align-items: center; justify-content: flex-start;">
+            <div class="fflex mr5"
+                 style="flex-direction: column; align-items: flex-end; justify-content: flex-start;">
+                <div style="padding-top: 2px; font-size: 14px; margin-right: 5px; font-weight: 500">Multiple solo mode</div>
+                <div style="padding-top: 3px; font-size: 13px; margin-right: 5px; color: #7f858e;">intersect or union tracks</div>
+
             </div>
+            <el-radio-group v-model="state.selectedSoloMode" size="normal" @change="command('solo_mode_changed')">
+                <el-radio-button label="intersection">
+                    <span>∩</span></el-radio-button>
+                <el-radio-button label="union">∪</el-radio-button>
+            </el-radio-group>
+
+
         </div>
 
-    </sly-field>
+    </div>
+
+    <div v-if="data.selectedTagsStats" style="padding-top: 16px">
+
+        <div v-for="(row, index) in data.selectedTagsStats">
+            <div class="fflex"
+                 style="flex-direction:row; justify-content: space-between; align-items: center;">
+                <!--                    <div style="flex-direction: row; align-items: center; justify-content: center">-->
+                <!--                        <span style="white-space: nowrap; text-overflow: ellipsis; font-size: 13px">-->
+                <!--                            <b>{{k}}</b>-->
+                <!--                        </span>-->
+                <!--                    </div>-->
+
+                <div class="solo-button-style"
+                     :style="{color: row.solo_button.soloButtonColorText, backgroundColor: row.solo_button.soloButtonColorBg}"
+                     @click="state.selectedTimelineRow={'index': index, 'soloButtonStage': row.solo_button.stage};
+                     command('solo_button_clicked')">
+                    S
+                </div>
+                <sly-timeline
+                        style="width: 100%; height: 25px;"
+
+
+                        :options="state.timelineOptions"
+                        :framesCount="data.videoInfo.frames_count"
+                        :intervals="row.frameRanges"
+                        :colors="row.colors"
+                        :pointer.sync="state.currentFrame"
+                        @update:pointer="command('pointer_updated')"
+                        @segment-selected="val => state.selectedSegment = val">
+                    <template slot-scope="{ activeInterval }">
+                        <span v-if="activeInterval">
+                            <span><b>{{row.tag}}: {{row.value}}</b> [{{ activeInterval.interval[0] }} - {{ activeInterval.interval[1] }}]</span>
+                        </span>
+                    </template>
+                </sly-timeline>
+            </div>
+        </div>
+    </div>
+
+
 </sly-card>
 

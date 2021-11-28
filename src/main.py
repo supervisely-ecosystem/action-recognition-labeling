@@ -32,7 +32,6 @@ def is_online(api: sly.Api, task_id, context, state, app_logger, fields_to_updat
         pass
 
 
-# @TODO: timeline on application start
 
 # @TODO: add finish labeling button logic
 

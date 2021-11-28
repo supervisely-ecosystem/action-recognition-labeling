@@ -3,6 +3,7 @@ import json
 import time
 import datetime
 
+import timeline
 from supervisely_lib.video_annotation.video_tag import VideoTag
 from supervisely_lib.video_annotation.video_tag_collection import VideoTagCollection
 
@@ -26,12 +27,7 @@ def init_fields(state, data):
     }
 
     data['videoInfo'] = None
-
-
-def get_annotations_data(api, video_id):
-    g.available_tags = f.get_available_tags(api, video_id)
-    g.tags_on_video = f.get_tags_on_video(api, video_id)
-    g.project_meta = sly.ProjectMeta.from_json(f.get_project_meta(api, video_id))
+    data['selectedTagsStats'] = []
 
 
 @g.my_app.callback("finish_labeling")
@@ -55,14 +51,7 @@ def finish_labeling(api: sly.Api, task_id, context, state, app_logger, fields_to
     # response = g.api.task.send_request(g.controller_session_id, "update_stats", data=data_to_send, timeout=3)
 
 
-
-@g.my_app.callback("get_new_item")
-@sly.timeit
-@g.update_fields
-@g.my_app.ignore_errors_and_show_dialog_window()
-def get_new_item(api: sly.Api, task_id, context, state, app_logger, fields_to_update):
-    fields_to_update['state.buttonsLoading.getItem'] = False
-
+def get_video_from_controller(api, state, context, fields_to_update):
     annotation_controller_id = state['annControllerId']
 
     data_to_send = {
@@ -83,12 +72,29 @@ def get_new_item(api: sly.Api, task_id, context, state, app_logger, fields_to_up
     for item, value in current_job_fields_to_update.items():
         fields_to_update[f'state.currentJobInfo.{item}'] = value
 
-    get_annotations_data(api, response['item_id'])
+    g.video_id = response['item_id']
+    g.project_meta = sly.ProjectMeta.from_json(f.get_project_meta(api, g.video_id))
+
+
+@g.my_app.callback("get_new_item")
+@sly.timeit
+@g.update_fields
+# @g.my_app.ignore_errors_and_show_dialog_window()
+def get_new_item(api: sly.Api, task_id, context, state, app_logger, fields_to_update):
+    fields_to_update['state.buttonsLoading.getItem'] = False
+
+    get_video_from_controller(api, state, context, fields_to_update)  # call controller part
+
+    tags_on_frames = f.get_tags_list_by_type('frame', g.video_id)  # frames tags part
+    g.tags2stats = f.get_tags_stats(tags_on_frames)
 
     labeling_tool.update_tab_by_name('frames')
     labeling_tool.update_tab_by_name('videos')
 
-    fields_to_update['data.videoInfo'] = api.video.get_info_by_id(response['item_id'])
+    fields_to_update['data.videoInfo'] = api.video.get_info_by_id(g.video_id)
+
+    tags_stats_in_table_form = f.tag_stats_to_table(g.tags2stats)
+    fields_to_update['data.selectedTagsStats'] = tags_stats_in_table_form
 
 
 def get_frame_ranges_by_tag_name_and_value(tag_name, tag_value):
@@ -160,39 +166,45 @@ def filter_tags_by_status(status, video_annotations, new_tags):
     tag_frame_ranges = get_frame_ranges_for_every_annotated_tag(
         tags_on_video)  # {tag1: {value1: [[]], value2: [[]], ..}, ..}
 
-    intersection_flag = True
-    if status == 'append':
-        intersection_flag = False
-
-    elif status == 'update':
-        intersection_flag = True
-
     for new_tag in new_tags:
         new_tag_json = new_tag.to_json()
         tag_name = new_tag_json.get('name')
         tag_value = new_tag_json.get('value')
-        tag_frame_range = new_tag_json.get('frameRange', None)
-        if tag_frame_range:
-            if ranges_intersected([tag_frame_range],
-                                  tag_frame_ranges.get(tag_name, {}).get(tag_value, [])) == intersection_flag:
-                filtered_tags.append(new_tag)
+        new_tag_frame_range = new_tag_json.get('frameRange', None)  # @TODO: VIDEO TAGS
+        if new_tag_frame_range:
+            old_tag_frame_ranges = tag_frame_ranges.get(tag_name, {}).get(tag_value, [])
+
+            if status == 'append':
+                if not ranges_intersected([new_tag_frame_range], old_tag_frame_ranges):
+                    filtered_tags.append(new_tag)
+
+            elif status == 'update':
+                if ranges_intersected([new_tag_frame_range], old_tag_frame_ranges) and \
+                        new_tag_frame_range not in old_tag_frame_ranges:
+                    filtered_tags.append(new_tag)
 
     return filtered_tags
 
 
-def get_existing_tag_id(tags_on_video, tag_name, tag_value, tag_frame_range=None):
-    for tag_on_video in tags_on_video:
-        frame_range = tag_on_video.get('frameRange', None)
+def get_existing_tag_id(current_tag, tag_frame_range=None):
+    frame_ranges = current_tag['frameRanges']
+    ids = current_tag['ids']
 
-        if tag_on_video.get('name', '') == tag_name and tag_on_video.get('value', '') == tag_value:
+    for frame_range, tag_id in zip(frame_ranges, ids):
+        if ranges_intersected([tag_frame_range], [frame_range]):
+            return tag_id
+    else:
+        return None
 
-            if frame_range and tag_frame_range:
-                if ranges_intersected([tag_frame_range], [frame_range]):
-                    return tag_on_video['id']
-            else:
-                return tag_on_video['id']
 
-    return -1
+def get_remote_tags(video_annotations):
+    remote_tags = {}
+    tags_list = video_annotations.get('tags', [])
+
+
+def update_tag_frame_range_by_id_locally(current_tag, tag_id, new_tag_frame_range):
+    index = current_tag['ids'].index(tag_id)
+    current_tag['frameRanges'][index] = new_tag_frame_range
 
 
 def upload_tags_by_status(api, video_id, status, tags_to_upload, video_annotations=None):
@@ -207,42 +219,55 @@ def upload_tags_by_status(api, video_id, status, tags_to_upload, video_annotatio
         api.video.annotation.append(video_id, video_ann)
 
     elif status == 'update':
-        tags_on_video = video_annotations.get('tags', [])
+        tags_on_frames = f.get_tags_list_by_type('frame', g.video_id)
+        tags_on_video = f.get_tags_list_by_type('video', g.video_id)
+
+        remote_tags_frames = f.get_tags_stats(tags_on_frames)
+        # remote_tags_video = f.get_tags_stats(tags_on_video)
 
         for tag_to_upload in tags_to_upload:
             tag_to_upload_json = tag_to_upload.to_json()
             tag_name = tag_to_upload_json.get('name')
             tag_value = tag_to_upload_json.get('value')
-            tag_frame_range = tag_to_upload_json.get('frameRange', None)
+            new_tag_frame_range = tag_to_upload_json.get('frameRange', None)
 
-            if tag_frame_range:
-                tag_id = get_existing_tag_id(tags_on_video, tag_name, tag_value, tag_frame_range)
-                if tag_id != -1:
-                    api.video.tag.update_value(tag_id=tag_id, tag_value=tag_value)  # update tag value
-                    api.video.tag.update_frame_range(tag_id=tag_id, frame_range=tag_frame_range)
+            current_tag = remote_tags_frames[tag_name][tag_value]
 
-            else:
-                tag_id = get_existing_tag_id(tags_on_video, tag_name, tag_value)
-                if tag_id != -1:
-                    api.video.tag.update_value(tag_id=tag_id, tag_value=tag_value)  # update tag value
+            if new_tag_frame_range is not None:  # FRAME TAGS
+                tag_id = get_existing_tag_id(current_tag, new_tag_frame_range)
+                if tag_id is not None:
+                    api.video.tag.update_frame_range(tag_id=tag_id, frame_range=new_tag_frame_range)
+                    update_tag_frame_range_by_id_locally(current_tag, tag_id, new_tag_frame_range)
+
+                else:
+                    meta_tag_id = g.project_meta.get_tag_meta(tag_name=tag_name).to_json()['id']
+                    api.video.tag.add_tag(
+                        project_meta_tag_id=meta_tag_id,
+                        video_id=g.video_id,
+                        value=tag_value,
+                        frame_range=new_tag_frame_range
+                    )
+                    update_tag_frame_range_by_id_locally(current_tag, -1, new_tag_frame_range)
+
+            else:  # @TODO: VIDEO TAGS
+                pass
+                # tag_id = get_existing_tag_id(current_tag)
+                # if tag_id != -1:
+                #     api.video.tag.update_value(tag_id=tag_id, tag_value=tag_value)  # update tag value
 
 
-def upload_frames_tags_to_video(api, video_id):
+def upload_tags_to_supervisely(api, video_id, updated_tags):
     video_tags = []
 
-    for current_tag in g.available_tags:
-        for current_value in current_tag.get('values', []):
-            tag_frames_ranges = get_frame_ranges_by_tag_name_and_value(current_tag['name'], current_value)
+    tags_to_remove = []
+    for tag_name, tag_value in updated_tags.items():
+        tag_frames_ranges = g.tags2stats[tag_name][tag_value]['frameRanges']
+        for current_frames_range in tag_frames_ranges:
+            tag_meta = g.project_meta.get_tag_meta(tag_name)
+            video_tags.append(VideoTag(tag_meta, value=tag_value, frame_range=current_frames_range))
 
-            if len(tag_frames_ranges) > 0:
-                g.tag_frame_ranges[f'{current_tag["name"]}: {current_value}'] = {
-                        'color': [current_tag['color'] for _ in range(len(tag_frames_ranges))],
-                        'ranges': tag_frames_ranges
-                    }  # temporal
-
-            for current_frames_range in tag_frames_ranges:
-                tag_meta = g.project_meta.get_tag_meta(current_tag['name'])
-                video_tags.append(VideoTag(tag_meta, value=current_value, frame_range=current_frames_range))
+        if len(tag_frames_ranges) == 0:
+            tags_to_remove.append({'name': tag_name, 'value': tag_value})
 
     if len(video_tags) > 0:
         video_annotations = api.video.annotation.download(video_id)
@@ -262,18 +287,37 @@ def convert_datetime_time_to_unix(datetime_time):
     return round((current_date - init_date).total_seconds())
 
 
+def get_updated_tags_dict(): ## HERE I PAUSED
+    updated_tags = {}
+
+    for updated_combinations in g.updated_tags.values():
+        for updated_combination in updated_combinations:
+            f.safe_dict_value_append(updated_tags, updated_combination['name'], updated_combination['value'])
+
+    return updated_tags
+
+
+def update_tags_ranges_locally(updated_tags):
+    for tag_name, tag_values in updated_tags.items():
+        for tag_value in tag_values:
+            frames_list = sorted(g.tags2stats[tag_name][tag_value]['framesList'])
+            f.get_frames_ranges_from_list(frames_list)
+            g.tags2stats[tag_name][tag_value]['frameRanges'] = f.get_frames_ranges_from_list(frames_list)
+
+
 @g.my_app.callback("save_annotations_manually")
 @sly.timeit
 @g.update_fields
 @g.my_app.ignore_errors_and_show_dialog_window()
 def save_annotations_manually(api: sly.Api, task_id, context, state, app_logger, fields_to_update):
     fields_to_update['state.buttonsLoading.saveAnn'] = False
-
     current_job_info = state['currentJobInfo']
+    updated_tags = get_updated_tags_dict()
+
+    update_tags_ranges_locally(updated_tags)
+    upload_tags_to_supervisely(api, current_job_info['videoId'], updated_tags)
+
     current_job_info['annotationsUpdatedTime'] = f.get_current_time()
-
-    upload_frames_tags_to_video(api, current_job_info['videoId'])
-
     fields_to_update['state.currentJobInfo'] = current_job_info
 
     old_user_stats = g.api.task.get_field(task_id=task_id, field='data.userStats')
@@ -305,6 +349,5 @@ def save_annotations_manually(api: sly.Api, task_id, context, state, app_logger,
 
     response = g.api.task.send_request(g.controller_session_id, "update_stats", data=data_to_send, timeout=3)
 
-    fields_to_update['data.timelineTags'] = g.tag_frame_ranges
-
-
+    tags_stats_in_table_form = f.tag_stats_to_table(g.tags2stats)
+    fields_to_update['data.selectedTagsStats'] = tags_stats_in_table_form
