@@ -14,7 +14,7 @@
         <sly-video :video-id="state.currentJobInfo.videoId"
                    :frame.sync="state.currentFrame"
                    :intervals="state.rangesToPlay"
-                   @update:frame="command('pointer_updated')"
+                   @update:frame="state.visibleChange=false; command('pointer_updated')"
         ></sly-video>
     </sly-field>
 </sly-card>

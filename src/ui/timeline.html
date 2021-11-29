@@ -54,7 +54,7 @@
                         :intervals="row.frameRanges"
                         :colors="row.colors"
                         :pointer.sync="state.currentFrame"
-                        @update:pointer="command('pointer_updated')"
+                        @update:pointer="state.visibleChange=false; command('pointer_updated')"
                         @segment-selected="val => state.selectedSegment = val">
                     <template slot-scope="{ activeInterval }">
                         <span v-if="activeInterval">

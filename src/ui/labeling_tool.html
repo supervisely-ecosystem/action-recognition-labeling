@@ -31,7 +31,14 @@
 
 
                                     @click="state.copyFromPrevActivated=!state.copyFromPrevActivated; state.lastAnnotatedFrame=state.currentFrame">
-                                FROM PREV <i class="zmdi zmdi-redo ml5"></i>
+
+                                <div v-if="!state.copyFromPrevActivated">
+                                    COPY MODE
+                                </div>
+                                <div v-else>
+                                    COPYING FROM {{state.lastAnnotatedFrame}}
+                                </div>
+
                             </el-button>
                         </div>
                         <div class="fflex" style="justify-content: center; flex-direction: column">
