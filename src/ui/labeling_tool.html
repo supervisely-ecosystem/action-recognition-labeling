@@ -36,7 +36,7 @@
                                     COPY MODE
                                 </div>
                                 <div v-else>
-                                    COPYING FROM {{state.lastAnnotatedFrame}}
+                                    COPYING {{state.lastAnnotatedFrame}}
                                 </div>
 
                             </el-button>
@@ -65,9 +65,9 @@
                                            size="small"
                                            clearable
                                            placeholder="not selected"
-                                           @change="state.updatedTag=current_tag; command('frame_tag_updated')"
+                                           @change="state.updatedTag=current_tag; state.tagType='frame'; command('tag_updated')"
                                            @visible-change="state.visibleChange=true"
-                                           @clear="state.updatedTag=current_tag; command('frame_tag_updated')"
+                                           @clear="state.visibleChange=true; state.updatedTag=current_tag; state.tagType='frame'; command('tag_updated')"
                                 >
                                     <el-option
                                             v-for="current_key in current_tag.available_values"
@@ -116,7 +116,10 @@
                                 <el-select v-model="current_tag.selected_value"
                                            size="small"
                                            clearable
-                                           placeholder="not selected">
+                                           placeholder="not selected"
+                                           @change="state.updatedTag=current_tag; state.tagType='video'; command('tag_updated')"
+                                           @visible-change="state.visibleChange=true"
+                                           @clear="state.visibleChange=true; state.updatedTag=current_tag; state.tagType='video'; command('tag_updated')">
                                     <el-option
                                             v-for="current_key in current_tag.available_values"
                                             :label="current_key"

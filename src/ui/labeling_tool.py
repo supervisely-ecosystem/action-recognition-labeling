@@ -18,6 +18,8 @@ def init_fields(state, data):
 
     state['copyFromPrevActivated'] = False
 
+    state['tagType'] = 'frame'
+
 
 @g.my_app.callback("clean_values")
 @sly.timeit
@@ -37,11 +39,11 @@ def clean_values(api: sly.Api, task_id, context, state, app_logger, fields_to_up
     fields_to_update[f'data.userStats["Unsaved Tags"]'] = f.get_unsaved_tags_count()
 
 
-@g.my_app.callback("frame_tag_updated")
+@g.my_app.callback("tag_updated")
 @sly.timeit
 @g.update_fields
 # @g.my_app.ignore_errors_and_show_dialog_window()
-def frame_tag_updated(api: sly.Api, task_id, context, state, app_logger, fields_to_update):
+def tag_updated(api: sly.Api, task_id, context, state, app_logger, fields_to_update):
     if state['updatedTag'].get('selected_value', None) is not None and state['visibleChange']:
         fields_to_update['state.visibleChange'] = False
 
@@ -49,11 +51,15 @@ def frame_tag_updated(api: sly.Api, task_id, context, state, app_logger, fields_
 
         if state['updatedTag']['selected_value'] is not None:
             g.user_stats['tags_created'] += 1
+            fields_to_update['state.currentJobInfo.tagsCreated'] = g.user_stats['tags_created']
 
-        f.update_tab_by_name('frames', current_frame=state['currentFrame'])
+        if state['tagType'] == 'frame':
+            f.update_tab_by_name('frames', current_frame=state['currentFrame'])
+            fields_to_update['state.currentJobInfo.framesAnnotated'] = len(g.user_stats['annotated_frames'])
+
+        if state['tagType'] == 'video':
+            f.update_tab_by_name('videos')
 
         g.user_stats['annotated_frames'].add(state['currentFrame'])  # MOVE TO SEP FUNC
-        fields_to_update['state.currentJobInfo.framesAnnotated'] = len(g.user_stats['annotated_frames'])
-        fields_to_update['state.currentJobInfo.tagsCreated'] = g.user_stats['tags_created']
         fields_to_update[f'data.userStats["Unsaved Tags"]'] = f.get_unsaved_tags_count()
 

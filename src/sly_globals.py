@@ -41,6 +41,8 @@ sly.logger.info(f"UI source directory: {ui_sources_dir}")
 sys.path.append(ui_sources_dir)
 
 tags2stats = {}
+video_tags = {}
+
 updated_tags = {}
 
 project_id = None

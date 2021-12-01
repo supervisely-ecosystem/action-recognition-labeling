@@ -248,7 +248,18 @@ def get_available_tags(frame_num):
     return available_fields
 
 
-def get_tags_on_frame(current_frame):
+def get_video_tags():
+    tags_on_video = []
+
+    for tag_name, tag_value in g.video_tags.items():
+        tags_on_video.append({'name': tag_name,
+                              'value': tag_value,
+                              'updated': tag_is_updated(tag_name, tag_value, 'video')})
+
+    return tags_on_video
+
+
+def get_frames_tags(current_frame):
     tags_on_frame = []
 
     for current_tag in g.tags2stats.keys():
@@ -308,23 +319,36 @@ def add_frame_index_locally(name, value, current_frame):
 def fill_available_tags_by_values(tab_content, tags_on_frame):
     for tag_on_frame in tags_on_frame:
         for tag_index, available_tag in enumerate(tab_content):
-            if available_tag['name'] == tag_on_frame['name'] and \
-                    tag_on_frame.get('value', '') in available_tag['available_values']:
-                tab_content[tag_index]['selected_value'] = tag_on_frame['value']
+            if available_tag['name'] == tag_on_frame['name']:
                 tab_content[tag_index]['updated'] = tag_on_frame['updated']
-
+                if tag_on_frame.get('value', '') in available_tag['available_values']:
+                    tab_content[tag_index]['selected_value'] = tag_on_frame['value']
                 break
+
+
+def update_video_tag_locally(updated_tag):
+    if updated_tag['selected_value'] is not None:
+        g.video_tags[updated_tag['name']] = updated_tag['selected_value']
+    else:
+        g.video_tags[updated_tag['name']] = None
+
+    safe_dict_value_append(g.updated_tags, 'video', {'name': updated_tag['name'],
+                                                     'value': g.video_tags[updated_tag['name']]})
 
 
 def process_updated_tag_locally(state):
     if state['updatedTag']['selected_value'] == '':
         state['updatedTag']['selected_value'] = None
 
-    update_tag_locally(state['currentFrame'], state['updatedTag'])
+    if state['tagType'] == 'frame':
+        update_frame_tag_locally(state['currentFrame'], state['updatedTag'])
+
+    if state['tagType'] == 'video':
+        update_video_tag_locally(state['updatedTag'])
 
 
-def update_tag_locally(current_frame, updated_tag):
-    tags_on_frame = get_tags_on_frame(current_frame)
+def update_frame_tag_locally(current_frame, updated_tag):
+    tags_on_frame = get_frames_tags(current_frame)
 
     for tag_index, tag_on_frame in enumerate(tags_on_frame):
         if updated_tag['name'] == tag_on_frame['name']:
@@ -343,14 +367,15 @@ def update_tag_locally(current_frame, updated_tag):
 def update_tab_by_name(tab_name, current_frame=0):
     tab_content = get_available_tags(current_frame)
 
-    if tab_name == 'videos':
+    if tab_name == 'videos':  # VIDEOS
         state_name = 'tagsOnVideo'
-        g.api.app.set_field(g.task_id, f'state.{state_name}', tab_content)
+        tags_on_card = get_video_tags()
 
-    if tab_name == 'frames':
+    else:  # FRAMES
         state_name = 'tagsOnFrame'
-        tags_on_frame = get_tags_on_frame(current_frame)
-        fill_available_tags_by_values(tab_content, tags_on_frame)
-        g.api.app.set_field(g.task_id, f'state.{state_name}', tab_content)
+        tags_on_card = get_frames_tags(current_frame)
+
+    fill_available_tags_by_values(tab_content, tags_on_card)
+    g.api.app.set_field(g.task_id, f'state.{state_name}', tab_content)
 
     return tab_content
