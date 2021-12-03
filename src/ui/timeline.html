@@ -1,5 +1,8 @@
-<sly-card class="custom-sly-card-border-radius"
-          style="margin: 5px 0; padding: 16px 0; padding-bottom: 10px; width: 100%;">
+<sly-card
+        :disabled="{disabled: !state.currentJobInfo.isStarted, message: 'get video to unlock'}"
+        class="custom-sly-card-border-radius disabled-background-fix"
+        style="margin: 5px 0; padding: 9px 0; width: 100%;"
+        :style="[!state.currentJobInfo.isStarted ? {'overflow': 'hidden'} : {'overflow': 'auto'}]">
 
 
     <div style="display: flex; flex-direction: row; align-items: center; justify-content: space-between;">
@@ -13,8 +16,11 @@
              style="padding: 2px 14px; flex-direction: row; align-items: center; justify-content: flex-start;">
             <div class="fflex mr5"
                  style="flex-direction: column; align-items: flex-end; justify-content: flex-start;">
-                <div style="padding-top: 2px; font-size: 14px; margin-right: 5px; font-weight: 500">Multiple solo mode</div>
-                <div style="padding-top: 3px; font-size: 13px; margin-right: 5px; color: #7f858e;">intersect or union tracks</div>
+                <div style="padding-top: 2px; font-size: 14px; margin-right: 5px; font-weight: 500">Multiple solo mode
+                </div>
+                <div style="padding-top: 3px; font-size: 13px; margin-right: 5px; color: #7f858e;">intersect or union
+                    tracks
+                </div>
 
             </div>
             <el-radio-group v-model="state.selectedSoloMode" size="normal" @change="command('solo_mode_changed')">

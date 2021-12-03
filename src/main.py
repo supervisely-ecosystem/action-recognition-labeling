@@ -32,12 +32,5 @@ def is_online(api: sly.Api, task_id, context, state, app_logger, fields_to_updat
         pass
 
 
-
-# @TODO: add finish labeling button logic
-
-# @TODO: if tag value changed inside range
-# @TODO: removing tag
-# @TODO: VIDEO TAGS handling
-
 if __name__ == "__main__":
     sly.main_wrapper("main", main)

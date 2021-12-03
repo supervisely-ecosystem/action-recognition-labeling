@@ -1,5 +1,17 @@
 <div id="action-recognition-labeling">
     <sly-style>
+
+        #action-recognition-labeling .disabled-background-fix .sly-card-disable-overlay {
+
+        border-radius: 18px;
+
+        top: -18px;
+        bottom: -18px;
+        left: -25px;
+        right: -25px;
+
+        }
+
         #action-recognition-labeling .custom-sly-card-border-radius {
         border-radius: 18px;
         padding: 16px 20px;
@@ -97,24 +109,35 @@
         }
 
         #action-recognition-labeling .black-to-gold-style:hover * {
-
         }
 
+        #action-recognition-labeling .labeling-tool-full-height .content-wrapper {
+        height: 100%;
+        }
+
+        #action-recognition-labeling .labeling-tool-full-height .el-tabs__content {
+        height: calc(100% - 40px);
+        }
+
+        #action-recognition-labeling .labeling-tool-full-height .el-tab-pane {
+        height: 100%;
+        }
 
     </sly-style>
 
     {% include 'src/ui/connect_to_controller.html' %}
 
+
     <div style="height: fit-content;
-    display: flex;  flex-direction: row; align-items: flex-start; justify-content: flex-start">
+    display: flex;  flex-direction: row; justify-content: flex-start; align-items: stretch">
 
         <div id="left-visual-container"
-             style="display: flex; flex-direction: column; align-items: flex-start; justify-content: flex-start">
+             style="width: 60%; display: flex; flex-direction: column; align-items: flex-start; justify-content: flex-start;">
             {% include 'src/ui/control_board.html' %}
             {% include 'src/ui/video_player.html' %}
         </div>
 
-        <div style="width: 100%; margin-left: 10px"
+        <div style="width: 40%; position: relative; margin-bottom: 10px; margin-right: 10px;"
              id="right-visual-container">
             {% include 'src/ui/labeling_tool.html' %}
 
@@ -123,4 +146,20 @@
 
     {% include 'src/ui/timeline.html' %}
 
+
+    <el-dialog
+            title="Finish labeling video?"
+            :visible.sync="state.showFinishDialog"
+            size="tiny">
+        <span>All changes will be saved. </span><br>
+        <span>Once confirmed, you cannot change the tags.</span>
+        <span slot="footer" class="dialog-footer">
+            <el-button @click="state.showFinishDialog=false">Cancel</el-button>
+
+            <el-button type="primary" class="regular"
+                       @click="state.showFinishDialog=false; state.buttonsLoading['finishLabeling']=true;  command('finish_labeling');">
+                Confirm
+            </el-button>
+        </span>
+    </el-dialog>
 </div>

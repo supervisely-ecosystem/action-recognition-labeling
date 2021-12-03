@@ -1,10 +1,16 @@
-<sly-card class="custom-sly-card-border-radius"
-          style="margin: 5px 0; padding: 16px 25px; width: 700px; justify-content: center">
+<sly-card
+        class="custom-sly-card-border-radius disabled-background-fix"
+        style="margin: 5px 0; padding: 5px 8px; width: 100%; justify-content: center"
+        :style="[!state.currentJobInfo.isStarted ? {'overflow': 'hidden'} : {'overflow': 'auto'}]"
+        :disabled="{disabled: !state.currentJobInfo.isStarted, message: 'get video to unlock'}"
+
+>
     <sly-field title="Video in Work"
                description="view video frames"
-               style="width: 100%"
+               style="margin-left: 15px; margin-top: 13px; margin-bottom: 0"
                class="mt10"
     >
+        </sly-field>
 
         <!--        <div style="font-size: 16px">-->
         <!--            <h3>video_id: {{state.currentJobInfo.videoId}}</h3>-->
@@ -16,6 +22,6 @@
                    :intervals="state.rangesToPlay"
                    @update:frame="state.visibleChange=false; command('pointer_updated')"
         ></sly-video>
-    </sly-field>
+
 </sly-card>
 

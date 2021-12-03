@@ -179,13 +179,6 @@ def tag_stats_to_table(tags2stats):
     return table
 
 
-def get_unsaved_tags_count():
-    counter = 0
-    for value in g.updated_tags.values():
-        counter += len(value)
-    return counter
-
-
 def get_frames_ranges_from_list(frames_list):
     frame_ranges = []
 
@@ -235,6 +228,7 @@ def tag_is_updated(name, value, frame_num):
 def get_available_tags(frame_num):
     available_fields = []
     project_tags = g.project_meta.to_json().get('tags', [])  # use to unpack available tags
+
     for current_tag in project_tags:
         if current_tag.get('values', None) is not None:  # ONLY TAGS WITH VALUES
             available_fields.append({
@@ -287,6 +281,8 @@ def remove_frame_index_locally(name, value, current_frame):
     try:
         frame_index = frames_list.index(current_frame)
         g.tags2stats[name][value]['framesList'].pop(frame_index)
+
+        g.user_stats['annotated_frames'].pop(current_frame)
     except Exception as ex:
         sly.logger.warn(f'locally tag remove failed: {ex}')
 
@@ -312,6 +308,7 @@ def add_frame_index_locally(name, value, current_frame):
     frames_list.add(current_frame)
     g.tags2stats[name][value]['framesList'] = list(frames_list)
 
+    g.user_stats['annotated_frames'].add(current_frame)
     safe_dict_value_append(g.updated_tags, current_frame, {'name': name,
                                                            'value': value})
 
@@ -329,6 +326,7 @@ def fill_available_tags_by_values(tab_content, tags_on_frame):
 def update_video_tag_locally(updated_tag):
     if updated_tag['selected_value'] is not None:
         g.video_tags[updated_tag['name']] = updated_tag['selected_value']
+
     else:
         g.video_tags[updated_tag['name']] = None
 
@@ -355,13 +353,19 @@ def update_frame_tag_locally(current_frame, updated_tag):
             remove_frame_index_locally(tag_on_frame['name'], tag_on_frame['value'], current_frame)
             if updated_tag['selected_value'] is not None:
                 add_frame_index_locally(tag_on_frame['name'], updated_tag['selected_value'], current_frame)
+
+                g.user_stats['tags_changed'].add(f'{tag_on_frame["name"]}:{current_frame}')
             else:
                 safe_dict_value_append(g.updated_tags, current_frame, {'name': updated_tag['name'],
                                                                        'value': None})
+
+                g.user_stats['tags_removed'].add(f'{tag_on_frame["name"]}:{current_frame}')
             break
     else:
         if updated_tag['selected_value'] is not None:
             add_frame_index_locally(updated_tag['name'], updated_tag['selected_value'], current_frame)
+
+            g.user_stats['tags_created'].add(f'{updated_tag["name"]}:{current_frame}')
 
 
 def update_tab_by_name(tab_name, current_frame=0):
@@ -379,3 +383,14 @@ def update_tab_by_name(tab_name, current_frame=0):
     g.api.app.set_field(g.task_id, f'state.{state_name}', tab_content)
 
     return tab_content
+
+
+def update_user_stats(fields_to_update):
+    fields_to_update['state.currentJobInfo.framesAnnotated'] = len(g.user_stats['annotated_frames'])
+    fields_to_update['state.currentJobInfo.tagsCreated'] = len(g.user_stats['tags_created'])
+
+    # fields_to_update[f'data.userStats["Frames Annotated"]'] = get_unsaved_tags_count()
+    # fields_to_update[f'data.userStats["Tags Created"]'] = get_unsaved_tags_count()
+    fields_to_update[f'data.userStats["Unsaved Tags"]'] = len(g.user_stats['tags_created'] |
+                                                          g.user_stats['tags_changed'] |
+                                                          g.user_stats['tags_removed'])

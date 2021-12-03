@@ -51,7 +51,11 @@ project_meta = None
 
 user_stats = {
     'annotated_frames': set([]),
-    'tags_created': 0
+    'tags_created': set(),
+    'tags_removed': set(),
+    'tags_changed': set(),
+    'tags_unsaved': set(),
+
 }
 
 tag_frame_ranges = {}

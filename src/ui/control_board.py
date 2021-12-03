@@ -29,6 +29,14 @@ def init_fields(state, data):
     data['videoInfo'] = None
     data['selectedTagsStats'] = []
 
+    state['showFinishDialog'] = False
+
+
+def return_item_to_controller(context, state):
+    data_to_send = get_general_data_to_send(context, state)
+
+    response = g.api.task.send_request(g.controller_session_id, "return_item", data=data_to_send, timeout=10)
+
 
 @g.my_app.callback("finish_labeling")
 @sly.timeit
@@ -37,18 +45,15 @@ def init_fields(state, data):
 def finish_labeling(api: sly.Api, task_id, context, state, app_logger, fields_to_update):
     fields_to_update['state.buttonsLoading.finishLabeling'] = False
 
-    # data_to_send = {  # sending data to controller
-    #     'userId': context['userId'],
-    #     'taskId': g.task_id,
-    #     'mode': state['userMode'],
-    #
-    #     'item_fields': {},
-    #     'user_fields': {
-    #
-    #     }
-    # }
-    #
-    # response = g.api.task.send_request(g.controller_session_id, "update_stats", data=data_to_send, timeout=3)
+    updated_tags = get_updated_tags_dict()
+    update_tags_ranges_locally(updated_tags)
+
+    update_job_stats(state, context, fields_to_update)
+    upload_tags_to_supervisely(api, state['currentJobInfo']['videoId'], updated_tags)
+
+    return_item_to_controller(context, state)
+
+    fields_to_update['state.currentJobInfo.isStarted'] = False
 
 
 def get_video_from_controller(api, state, context, fields_to_update):
@@ -98,36 +103,6 @@ def get_new_item(api: sly.Api, task_id, context, state, app_logger, fields_to_up
     f.update_tab_by_name('videos')
 
     fields_to_update['data.videoInfo'] = api.video.get_info_by_id(g.video_id)
-
-
-#
-# def get_frame_ranges_by_tag_name_and_value(tag_name, tag_value):
-#     frame_ranges = []
-#
-#     first_frame_in_range = None
-#     prev_frame_index = -1
-#
-#     for frame_index, tags_on_frame in g.tags_on_video['frames'].items():
-#         for current_tag in tags_on_frame:
-#             if current_tag['name'] == tag_name and current_tag['value'] == tag_value:
-#                 if first_frame_in_range is None:
-#                     first_frame_in_range = frame_index
-#                     prev_frame_index = frame_index
-#
-#                 elif frame_index - 1 == prev_frame_index:
-#                     prev_frame_index = frame_index
-#
-#                 else:
-#                     frame_ranges.append([first_frame_in_range, prev_frame_index])
-#
-#                     first_frame_in_range = frame_index
-#                     prev_frame_index = frame_index
-#
-#     if first_frame_in_range is not None:
-#         if [first_frame_in_range, prev_frame_index] not in frame_ranges:
-#             frame_ranges.append([first_frame_in_range, prev_frame_index])
-#
-#     return frame_ranges
 
 
 def get_frame_ranges_for_every_annotated_tag(annotated_tags):
@@ -186,7 +161,8 @@ def get_annotated_tag_id(annotated_tags, tag_name, tag_value, frame_range=None):
 def filter_tags_by_status(status, remote_tags_frames, remote_tags_video, new_tags):
     filtered_tags = []
 
-    tag_frame_ranges = get_frame_ranges_for_every_annotated_tag(remote_tags_frames)  # {tag1: {value1: [[]], value2: [[]], ..}, ..}
+    tag_frame_ranges = get_frame_ranges_for_every_annotated_tag(
+        remote_tags_frames)  # {tag1: {value1: [[]], value2: [[]], ..}, ..}
 
     for new_tag in new_tags:
         new_tag_json = new_tag.to_json()
@@ -249,7 +225,7 @@ def renew_tags_by_status(api, video_id, status, tags_to_upload):
         tags_on_video = f.get_tags_list_by_type('video', g.video_id)
 
         remote_tags_frames = f.get_tags_stats(tags_on_frames)
-        remote_tags_video = f.get_tags_stats(tags_on_video)
+        # remote_tags_video = f.get_tags_stats(tags_on_video)
 
         for tag_to_upload in tags_to_upload:
             tag_to_upload_json = tag_to_upload.to_json()
@@ -346,7 +322,8 @@ def filter_by_tags_to_process(remote_tags_frames, remote_tags_video, tags_to_pro
         remote_tags = remote_tags_video.get(current_tag['name'], None)
         if remote_tags is not None:
             for remote_tag_value in remote_tags.keys():
-                filtered_videos_tags[current_tag['name']][remote_tag_value] = remote_tags_video[current_tag['name']][remote_tag_value]
+                filtered_videos_tags[current_tag['name']][remote_tag_value] = remote_tags_video[current_tag['name']][
+                    remote_tag_value]
 
     return filtered_frames_tags, filtered_videos_tags
 
@@ -383,9 +360,11 @@ def upload_frame_tags(api, video_id, updated_tags):
         tags_on_frames = f.get_tags_list_by_type('frame', g.video_id)
         tags_on_video = f.get_tags_list_by_type('video', g.video_id)
 
-        tags_to_append = filter_tags_by_status(status='append', remote_tags_frames=tags_on_frames, remote_tags_video=tags_on_video,
+        tags_to_append = filter_tags_by_status(status='append', remote_tags_frames=tags_on_frames,
+                                               remote_tags_video=tags_on_video,
                                                new_tags=tags_to_process)
-        tags_to_update = filter_tags_by_status(status='update', remote_tags_frames=tags_on_frames, remote_tags_video=tags_on_video,
+        tags_to_update = filter_tags_by_status(status='update', remote_tags_frames=tags_on_frames,
+                                               remote_tags_video=tags_on_video,
                                                new_tags=tags_to_process)
 
         renew_tags_by_status(api, video_id, 'append', tags_to_append)
@@ -434,9 +413,7 @@ def update_tags_ranges_locally(updated_tags):
                 pass
 
 
-def update_job_stats(state, context, fields_to_update):
-    fields_to_update['state.currentJobInfo.annotationsUpdatedTime'] = f.get_current_time()
-
+def get_updated_user_stats(state):
     old_user_stats = g.api.task.get_field(task_id=g.task_id, field='data.userStats')
 
     time_in_work = time.time() - state['currentJobInfo']['startTime']
@@ -448,23 +425,62 @@ def update_job_stats(state, context, fields_to_update):
         'Time in Work': f'{f.get_datetime_by_unix(unix_time_in_work)}'
     }
 
+    return user_stats
+
+
+def update_user_stats_remotely(user_stats, fields_to_update):
     for key, value in user_stats.items():
         fields_to_update[f'data.userStats.{key}'] = value
 
-    data_to_send = {  # sending data to controller
+
+def get_user_data_to_send(state, user_stats):
+    old_user_stats = g.api.task.get_field(task_id=g.task_id, field='data.userStats')
+    time_in_work = time.time() - state['currentJobInfo']['startTime']
+    unix_time_in_work = time_in_work + convert_datetime_time_to_unix(old_user_stats.get("Time in Work", "00:00:00"))
+
+    return {'user_fields': {
+        UserStatsField.FRAMES_ANNOTATED: user_stats['Frames Annotated'],
+        UserStatsField.TAGS_CREATED: user_stats['Tags Created'],
+        UserStatsField.WORK_TIME: unix_time_in_work
+    }}
+
+def get_item_data_to_send(state, user_stats):
+    return {'item_fields': {
+    }}
+
+
+def get_general_data_to_send(context, state):
+    data_to_send = {
         'userId': context['userId'],
         'taskId': g.task_id,
         'mode': state['userMode'],
-
-        'item_fields': {},
-        'user_fields': {
-            UserStatsField.FRAMES_ANNOTATED: user_stats['Frames Annotated'],
-            UserStatsField.TAGS_CREATED: user_stats['Tags Created'],
-            UserStatsField.WORK_TIME: unix_time_in_work
-        }
     }
 
-    response = g.api.task.send_request(g.controller_session_id, "update_stats", data=data_to_send, timeout=3)
+    return data_to_send
+
+
+def update_job_stats(state, context, fields_to_update):
+    fields_to_update['state.currentJobInfo.annotationsUpdatedTime'] = f.get_current_time()
+
+    user_stats = get_updated_user_stats(state)
+    update_user_stats_remotely(user_stats, fields_to_update)
+
+    data_to_send = get_general_data_to_send(context, state)
+    data_to_send.update(get_user_data_to_send(state, user_stats))
+    data_to_send.update(get_item_data_to_send(state, user_stats))
+
+    response = g.api.task.send_request(g.controller_session_id, "update_stats", data=data_to_send, timeout=10)
+
+
+def reset_local_fields(fields_to_update):
+    g.updated_tags = {}
+    g.user_stats.update({
+        'tags_created': set(),
+        'tags_removed': set(),
+        'tags_changed': set(),
+    })
+
+    fields_to_update[f'data.userStats["Unsaved Tags"]'] = 0
 
 
 @g.my_app.callback("save_annotations_manually")
@@ -477,16 +493,15 @@ def save_annotations_manually(api: sly.Api, task_id, context, state, app_logger,
     updated_tags = get_updated_tags_dict()
     update_tags_ranges_locally(updated_tags)
 
-    upload_tags_to_supervisely(api, state['currentJobInfo']['videoId'], updated_tags)
     update_job_stats(state, context, fields_to_update)
+    upload_tags_to_supervisely(api, state['currentJobInfo']['videoId'], updated_tags)
 
     tags_on_frames = f.get_tags_list_by_type('frame', g.video_id)  # update tags on timeline
     g.tags2stats = f.get_tags_stats(tags_on_frames)
     tags_stats_in_table_form = f.tag_stats_to_table(g.tags2stats)
     fields_to_update['data.selectedTagsStats'] = tags_stats_in_table_form
 
-    g.updated_tags = {}
-    fields_to_update[f'data.userStats["Unsaved Tags"]'] = f.get_unsaved_tags_count()
+    reset_local_fields(fields_to_update)
 
     for current_tab_name in ['frames', 'videos']:
         f.update_tab_by_name(current_tab_name, current_frame=state['currentFrame'])

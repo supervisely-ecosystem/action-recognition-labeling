@@ -1,6 +1,12 @@
-<sly-card class="custom-sly-card-border-radius"
-style="margin: 5px 0; padding: 5px 10px; width: 700px; justify-content: center">
-    <div class="fflex" style="padding-top: 4px; flex-direction: row; align-items: flex-end; justify-content: space-between;">
+<sly-card
+        :disabled="{disabled: !state.controllerConnected, message: 'connect to controller to unlock'}"
+        class="custom-sly-card-border-radius "
+        style="margin: 5px 0; padding: 5px 10px; width: 100%; justify-content: center"
+        :style="[!state.controllerConnected ? {'overflow': 'hidden'} : {'overflow': 'auto'}]">
+
+
+    <div class="fflex"
+         style="padding-top: 4px; flex-direction: row; align-items: flex-end; justify-content: space-between;">
         <div class="fflex" style="justify-content: flex-end; align-items: flex-end; flex-direction: row">
 
             <el-button class="regular"
@@ -14,7 +20,7 @@ style="margin: 5px 0; padding: 5px 10px; width: 700px; justify-content: center">
                 get video
             </el-button>
         </div>
-        <div  class="fflex" style="justify-content: center; align-items: flex-end; flex-direction: row">
+        <div class="fflex" style="justify-content: center; align-items: flex-end; flex-direction: row">
             <div class="fflex" style="justify-content: center; flex-direction: column">
                 <p style="font-size: 12px; color: #5a6772; margin: 1px 0">
                     last save: <b style="color: #453e00;"></b>{{state.currentJobInfo.annotationsUpdatedTime}}</p>
@@ -23,7 +29,7 @@ style="margin: 5px 0; padding: 5px 10px; width: 700px; justify-content: center">
 
                            type="warning"
                            size="small"
-                           :disabled="!state.currentJobInfo.isStarted"
+                           :disabled="!state.currentJobInfo.isStarted || state.buttonsLoading.finishLabeling || data.userStats['Unsaved Tags'] == 0"
                            :loading="state.buttonsLoading['saveAnn']"
                            @click="state.buttonsLoading['saveAnn']=true; command('save_annotations_manually');">
                     save annotations
@@ -38,27 +44,13 @@ style="margin: 5px 0; padding: 5px 10px; width: 700px; justify-content: center">
                        size="small"
                        :disabled="!state.currentJobInfo.isStarted"
                        :loading="state.buttonsLoading['finishLabeling']"
-                       @click="state.buttonsLoading['finishLabeling']=true; command('finish_labeling');">
+                       @click="state.showFinishDialog=true;">
                 finish labeling
             </el-button>
 
         </div>
     </div>
 
-    <el-dialog
-            title="Finish labeling video?"
-            :visible.sync="state.showLabelingDialog"
-            size="tiny">
-        <span>All changes will be saved. </span>
-        <span>Once confirmed, you cannot change the tags.</span>
-        <span slot="footer" class="dialog-footer">
-            <el-button @click="state.showLabelingDialog=false">Cancel</el-button>
 
-            <el-button type="primary" class="regular"
-                       @click="command('finishAnnotating');">
-                Confirm
-            </el-button>
-        </span>
-    </el-dialog>
 </sly-card>
 

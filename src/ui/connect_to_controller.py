@@ -37,11 +37,51 @@ def init_fields(state, data):
 
     data['userStats'] = {
         'Videos Annotated': None,
-        'Tags Created': None,
+        'Tags Created': 0,
         'Time in Work': None,
         'Frames Annotated': None,
         'Unsaved Tags': 0
     }
+
+
+def set_available_mods_by_response(response, fields_to_update):
+    if response['can_annotate'] and response['can_review']:
+        fields_to_update['state.userAvailableMods'] = ['annotator', 'reviewer']
+        fields_to_update['state.userMode'] = 'annotator'
+    elif response['can_annotate']:
+        fields_to_update['state.userMode'] = 'annotator'
+        fields_to_update['state.userAvailableMods'] = ['annotator']
+    elif response['can_review']:
+        fields_to_update['state.userMode'] = 'reviewer'
+        fields_to_update['state.userAvailableMods'] = ['reviewer']
+    else:
+        raise UserWarning(
+            f'You have no annotating or reviewing rights. Please call Annotation Controller admin.')
+
+
+def update_user_stats_by_response(response, fields_to_update):
+    if response.get('user_stats') is not None:
+        user_stats = {
+            'Videos Annotated': response['user_stats'].get('items_annotated', 0),
+            'Frames Annotated': response['user_stats'].get('frames_annotated', 0),
+            'Tags Created': response['user_stats'].get('tags_created', 0),
+            'Time in Work': f.get_datetime_by_unix(response['user_stats'].get('work_time'))
+            if response['user_stats'].get('work_time') is not None else f.get_datetime_by_unix(0)
+        }
+
+        for key, value in user_stats.items():
+            fields_to_update[f'data.userStats.{key}'] = value
+
+
+def update_connected_data_by_response(response, fields_to_update):
+    connected_data = {
+        'Status': "Connected",
+        'Session ID': g.controller_session_id,
+        'Admin Nickname': response.get('admin_nickname', None),
+        'Videos for Annotation': response.get('items_for_annotation_count', None),
+        'Videos for Review': response.get('items_for_review_count', None)
+    }
+    fields_to_update['data.connectedData'] = connected_data
 
 
 @g.my_app.callback("connect_to_controller")
@@ -57,44 +97,12 @@ def connect_to_controller(api: sly.Api, task_id, context, state, app_logger, fie
     rc = response['rc']
 
     if rc == 0:
-        if response['can_annotate'] and response['can_review']:
-            fields_to_update['state.userAvailableMods'] = ['annotator', 'reviewer']
-            fields_to_update['state.userMode'] = 'annotator'
-        elif response['can_annotate']:
-            fields_to_update['state.userMode'] = 'annotator'
-            fields_to_update['state.userAvailableMods'] = ['annotator']
-        elif response['can_review']:
-            fields_to_update['state.userMode'] = 'reviewer'
-            fields_to_update['state.userAvailableMods'] = ['reviewer']
-        else:
-            raise UserWarning(
-                f'You have no annotating or reviewing rights. Please call Annotation Controller admin.')
+        set_available_mods_by_response(response, fields_to_update)
+        update_connected_data_by_response(response, fields_to_update)
+        update_user_stats_by_response(response, fields_to_update)
 
         g.controller_session_id = task_id
         fields_to_update['state.controllerConnected'] = True
-
-        connected_data = {
-            'Status': "Connected",
-            'Session ID': g.controller_session_id,
-            'Admin Nickname': response.get('admin_nickname', None),
-            'Videos for Annotation': response.get('items_for_annotation_count', None),
-            'Videos for Review': response.get('items_for_review_count', None)
-        }
-
-        if response.get('user_stats'):
-            user_stats = {
-                'Videos Annotated': response['user_stats'].get('items_annotated', 0),
-                'Frames Annotated': response['user_stats'].get('frames_annotated', 0),
-                'Tags Created': response['user_stats'].get('tags_created', 0),
-                'Time in Work': f.get_datetime_by_unix(response['user_stats'].get('work_time'))
-                if response['user_stats'].get('work_time') is not None else f.get_datetime_by_unix(0)
-            }
-
-            for key, value in user_stats.items():
-                fields_to_update[f'data.userStats.{key}'] = value
-
-        fields_to_update['data.connectedData'] = connected_data
-
     elif rc == -1:
         raise UserWarning(
             f'User with your ID is already connected: /apps/{g.workspace_id}/sessions/{response["taskId"]}')

@@ -36,7 +36,7 @@ def clean_values(api: sly.Api, task_id, context, state, app_logger, fields_to_up
         f.process_updated_tag_locally(state)
 
     f.update_tab_by_name('frames', current_frame=state['currentFrame'])
-    fields_to_update[f'data.userStats["Unsaved Tags"]'] = f.get_unsaved_tags_count()
+    f.update_user_stats(fields_to_update)
 
 
 @g.my_app.callback("tag_updated")
@@ -49,17 +49,14 @@ def tag_updated(api: sly.Api, task_id, context, state, app_logger, fields_to_upd
 
         f.process_updated_tag_locally(state)
 
-        if state['updatedTag']['selected_value'] is not None:
-            g.user_stats['tags_created'] += 1
-            fields_to_update['state.currentJobInfo.tagsCreated'] = g.user_stats['tags_created']
-
         if state['tagType'] == 'frame':
             f.update_tab_by_name('frames', current_frame=state['currentFrame'])
-            fields_to_update['state.currentJobInfo.framesAnnotated'] = len(g.user_stats['annotated_frames'])
 
         if state['tagType'] == 'video':
             f.update_tab_by_name('videos')
 
-        g.user_stats['annotated_frames'].add(state['currentFrame'])  # MOVE TO SEP FUNC
-        fields_to_update[f'data.userStats["Unsaved Tags"]'] = f.get_unsaved_tags_count()
+        f.update_user_stats(fields_to_update)
+
+
+
 
