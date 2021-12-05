@@ -84,7 +84,7 @@ def get_video_from_controller(api, state, context, fields_to_update):
 @g.my_app.callback("get_new_item")
 @sly.timeit
 @g.update_fields
-# @g.my_app.ignore_errors_and_show_dialog_window()
+@g.my_app.ignore_errors_and_show_dialog_window()
 def get_new_item(api: sly.Api, task_id, context, state, app_logger, fields_to_update):
     fields_to_update['state.buttonsLoading.getItem'] = False
 
@@ -441,8 +441,10 @@ def get_user_data_to_send(state, user_stats):
     return {'user_fields': {
         UserStatsField.FRAMES_ANNOTATED: user_stats['Frames Annotated'],
         UserStatsField.TAGS_CREATED: user_stats['Tags Created'],
-        UserStatsField.WORK_TIME: unix_time_in_work
+        UserStatsField.WORK_TIME_UNIX: unix_time_in_work,
+        UserStatsField.WORK_TIME: f.get_datetime_by_unix(unix_time_in_work)
     }}
+
 
 def get_item_data_to_send(state, user_stats):
     return {'item_fields': {

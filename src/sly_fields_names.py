@@ -12,4 +12,5 @@ class UserStatsField:
     ITEMS_ANNOTATED = "items_annotated"
     FRAMES_ANNOTATED = "frames_annotated"
     TAGS_CREATED = "tags_created"
+    WORK_TIME_UNIX = "work_time_unix"
     WORK_TIME = "work_time"

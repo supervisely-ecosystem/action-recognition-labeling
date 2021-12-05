@@ -6,6 +6,8 @@ import supervisely_lib as sly
 
 import sly_functions as f
 
+from sly_fields_names import UserStatsField
+
 
 def init_fields(state, data):
     state['userMode'] = None
@@ -65,8 +67,8 @@ def update_user_stats_by_response(response, fields_to_update):
             'Videos Annotated': response['user_stats'].get('items_annotated', 0),
             'Frames Annotated': response['user_stats'].get('frames_annotated', 0),
             'Tags Created': response['user_stats'].get('tags_created', 0),
-            'Time in Work': f.get_datetime_by_unix(response['user_stats'].get('work_time'))
-            if response['user_stats'].get('work_time') is not None else f.get_datetime_by_unix(0)
+            'Time in Work': f.get_datetime_by_unix(response['user_stats'].get(UserStatsField.WORK_TIME_UNIX))
+            if response['user_stats'].get(UserStatsField.WORK_TIME_UNIX) is not None else f.get_datetime_by_unix(0)
         }
 
         for key, value in user_stats.items():
