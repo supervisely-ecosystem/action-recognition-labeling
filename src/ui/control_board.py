@@ -37,6 +37,8 @@ def return_item_to_controller(context, state):
 
     response = g.api.task.send_request(g.controller_session_id, "return_item", data=data_to_send, timeout=10)
 
+    return response
+
 
 @g.my_app.callback("finish_labeling")
 @sly.timeit
@@ -51,7 +53,9 @@ def finish_labeling(api: sly.Api, task_id, context, state, app_logger, fields_to
     update_job_stats(state, context, fields_to_update)
     upload_tags_to_supervisely(api, state['currentJobInfo']['videoId'], updated_tags)
 
-    return_item_to_controller(context, state)
+    response = return_item_to_controller(context, state)
+    f.set_available_mods_by_response(response, fields_to_update)
+    f.update_connected_data_by_response(response, fields_to_update)
 
     fields_to_update['state.currentJobInfo.isStarted'] = False
 

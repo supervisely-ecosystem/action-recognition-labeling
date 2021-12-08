@@ -4,7 +4,7 @@ from string import Formatter
 import supervisely_lib as sly
 
 import sly_globals as g
-from sly_fields_names import ItemsStatusField
+from sly_fields_names import ItemsStatusField, UserStatsField
 
 solo_button_stages = {
     0: {
@@ -401,3 +401,44 @@ def update_user_stats(fields_to_update):
     fields_to_update[f'data.userStats["Unsaved Tags"]'] = len(g.user_stats['tags_created'] |
                                                           g.user_stats['tags_changed'] |
                                                           g.user_stats['tags_removed'])
+
+
+
+def set_available_mods_by_response(response, fields_to_update):
+    if response['can_annotate'] and response['can_review']:
+        fields_to_update['state.userAvailableMods'] = ['annotator', 'reviewer']
+        fields_to_update['state.userMode'] = 'annotator'
+    elif response['can_annotate']:
+        fields_to_update['state.userMode'] = 'annotator'
+        fields_to_update['state.userAvailableMods'] = ['annotator']
+    elif response['can_review']:
+        fields_to_update['state.userMode'] = 'reviewer'
+        fields_to_update['state.userAvailableMods'] = ['reviewer']
+    else:
+        raise UserWarning(
+            f'You have no annotating or reviewing rights. Please call Annotation Controller admin.')
+
+
+def update_user_stats_by_response(response, fields_to_update):
+    if response.get('user_stats') is not None:
+        user_stats = {
+            'Videos Annotated': response['user_stats'].get('items_annotated', 0),
+            'Frames Annotated': response['user_stats'].get('frames_annotated', 0),
+            'Tags Created': response['user_stats'].get('tags_created', 0),
+            'Time in Work': get_datetime_by_unix(response['user_stats'].get(UserStatsField.WORK_TIME_UNIX))
+            if response['user_stats'].get(UserStatsField.WORK_TIME_UNIX) is not None else get_datetime_by_unix(0)
+        }
+
+        for key, value in user_stats.items():
+            fields_to_update[f'data.userStats.{key}'] = value
+
+
+def update_connected_data_by_response(response, fields_to_update):
+    connected_data = {
+        'Status': "Connected",
+        'Session ID': g.controller_session_id,
+        'Admin Nickname': response.get('admin_nickname', None),
+        'Videos for Annotation': response.get('items_for_annotation_count', None),
+        'Videos for Review': response.get('items_for_review_count', None)
+    }
+    fields_to_update['data.connectedData'] = connected_data
