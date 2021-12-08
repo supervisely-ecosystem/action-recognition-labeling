@@ -10,18 +10,29 @@
                style="margin-left: 15px; margin-top: 13px; margin-bottom: 0"
                class="mt10"
     >
-        </sly-field>
+    </sly-field>
 
-        <!--        <div style="font-size: 16px">-->
-        <!--            <h3>video_id: {{state.currentJobInfo.videoId}}</h3>-->
-        <!--            <h3>current_frame: {{state.currentFrame}}</h3>-->
-        <!--        </div>-->
+    <!--        <div style="font-size: 16px">-->
+    <!--            <h3>video_id: {{state.currentJobInfo.videoId}}</h3>-->
+    <!--            <h3>current_frame: {{state.currentFrame}}</h3>-->
+    <!--        </div>-->
 
-        <sly-video :video-id="state.currentJobInfo.videoId"
-                   :frame.sync="state.currentFrame"
-                   :intervals="state.rangesToPlay"
-                   @update:frame="state.visibleChange=false; command('pointer_updated')"
-        ></sly-video>
+<!--    {{state.videoInPlay}}-->
+
+    <sly-video :video-id="state.currentJobInfo.videoId"
+               :frame.sync="state.currentFrame"
+               :intervals="state.rangesToPlay"
+               :disabled="state.videoInPlay"
+               @update:frame="() => {
+                   if (state.videoInPlay) return;
+
+                   command('pointer_updated');
+                   state.visibleChange=false;
+               }"
+               @play="state.videoInPlay=true; state.videoPlayedInterval[0]=state.currentFrame"
+               @pause="state.videoInPlay=false; state.videoPlayedInterval[1]=state.currentFrame; command('interval_played')"
+
+    ></sly-video>
 
 </sly-card>
 

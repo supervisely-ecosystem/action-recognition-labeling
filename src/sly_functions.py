@@ -368,7 +368,7 @@ def update_frame_tag_locally(current_frame, updated_tag):
             g.user_stats['tags_created'].add(f'{updated_tag["name"]}:{current_frame}')
 
 
-def update_tab_by_name(tab_name, current_frame=0):
+def get_tags_on_frame(tab_name, current_frame=0):
     tab_content = get_available_tags(current_frame)
 
     if tab_name == 'videos':  # VIDEOS
@@ -380,6 +380,13 @@ def update_tab_by_name(tab_name, current_frame=0):
         tags_on_card = get_frames_tags(current_frame)
 
     fill_available_tags_by_values(tab_content, tags_on_card)
+
+    return tab_content, state_name
+
+
+def update_tab_by_name(tab_name, current_frame=0):
+
+    tab_content, state_name = get_tags_on_frame(tab_name, current_frame)
     g.api.app.set_field(g.task_id, f'state.{state_name}', tab_content)
 
     return tab_content
