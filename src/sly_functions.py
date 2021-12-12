@@ -282,7 +282,10 @@ def remove_frame_index_locally(name, value, current_frame):
         frame_index = frames_list.index(current_frame)
         g.tags2stats[name][value]['framesList'].pop(frame_index)
 
-        g.user_stats['annotated_frames'].pop(current_frame)
+        annotated_frames_list = list(g.user_stats['annotated_frames'])
+        annotated_frames_list.pop(current_frame)
+        g.user_stats['annotated_frames'] = set(annotated_frames_list)
+
     except Exception as ex:
         sly.logger.warn(f'locally tag remove failed: {ex}')
 
@@ -326,9 +329,11 @@ def fill_available_tags_by_values(tab_content, tags_on_frame):
 def update_video_tag_locally(updated_tag):
     if updated_tag['selected_value'] is not None:
         g.video_tags[updated_tag['name']] = updated_tag['selected_value']
+        g.user_stats['tags_changed'].add(f'{updated_tag["name"]}:{updated_tag["selected_value"]}')
 
     else:
         g.video_tags[updated_tag['name']] = None
+        g.user_stats['tags_removed'].add(f'{updated_tag["name"]}:{""}')
 
     safe_dict_value_append(g.updated_tags, 'video', {'name': updated_tag['name'],
                                                      'value': g.video_tags[updated_tag['name']]})
@@ -442,3 +447,45 @@ def update_connected_data_by_response(response, fields_to_update):
         'Videos for Review': response.get('items_for_review_count', None)
     }
     fields_to_update['data.connectedData'] = connected_data
+
+
+def update_tags_ranges_locally(updated_tags):
+    for tag_name, tag_values in updated_tags.items():
+        for tag_value in tag_values:
+            try:
+                frames_list = g.tags2stats[tag_name][tag_value].get('framesList')
+                if frames_list is not None:
+                    frames_list = sorted(frames_list)
+                    get_frames_ranges_from_list(frames_list)
+                    g.tags2stats[tag_name][tag_value]['frameRanges'] = get_frames_ranges_from_list(frames_list)
+            except Exception:
+                pass
+
+
+def get_updated_tags_dict():
+    updated_tags = {}
+
+    for tag_point, updated_combinations in g.updated_tags.items():
+
+        for updated_combination in updated_combinations:
+            if updated_combination['value'] is not None:
+                safe_dict_value_append(updated_tags, updated_combination['name'], updated_combination['value'])
+
+    for updated_tag in updated_tags.keys():
+        updated_tags[updated_tag] = list(set(updated_tags[updated_tag]))
+
+    return updated_tags
+
+
+def update_tags_on_timeline(fields_to_update):
+    updated_tags = get_updated_tags_dict()
+    update_tags_ranges_locally(updated_tags)
+    tags_stats_in_table_form = tag_stats_to_table(g.tags2stats)
+    fields_to_update['data.selectedTagsStats'] = tags_stats_in_table_form  # update tags
+
+    updated_tags_ranges = get_frames_ranges_from_list(sorted(list(g.updated_tags.keys())))  # update changed tags line
+    fields_to_update['state.updatedRanges'] = {
+        'frameRanges': updated_tags_ranges,
+        'colors': ["#f8ba29" for _ in range(len(updated_tags_ranges))]
+    }
+    print()

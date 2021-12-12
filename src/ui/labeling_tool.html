@@ -2,7 +2,10 @@
         :disabled="{disabled: !state.currentJobInfo.isStarted, message: 'get video to unlock'}"
         class="custom-sly-card-border-radius disabled-background-fix labeling-tool-full-height"
         style="margin: 5px 10px; position: absolute; padding: 16px 25px; padding-bottom: 2px; width: 100%; height: 100%;"
-        :style="[!state.currentJobInfo.isStarted ? {'overflow': 'hidden'} : {'overflow': 'auto'}]">
+        :style="[!state.currentJobInfo.isStarted ? {'overflow': 'hidden'} : {'overflow': 'auto'}]"
+        v-loading="state.videoInPlay" element-loading-text="video in play"
+>
+
 
     <div style="display: flex; flex-direction: row; align-items: center; justify-content: space-between;">
         <sly-field title="Labeling Tool"
@@ -109,7 +112,7 @@
             </el-tab-pane>
             <el-tab-pane label="VIDEO TAGS" name="videos">
 
-                <div v-if="state.tagsOnVideo.length > 0"  style="height: 100%;">
+                <div v-if="state.tagsOnVideo.length > 0" style="height: 100%;">
                     <div style="max-height: calc(100% - 12px); overflow: auto;">
                         <div v-for="current_tag in state.tagsOnVideo">
                             <div style="display: flex; flex-direction: row; align-items: center; justify-content: space-between"

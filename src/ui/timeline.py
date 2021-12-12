@@ -13,6 +13,15 @@ from functools import lru_cache
 def init_fields(state, data):
     state['selectedSegment'] = None
 
+    state['updatedRanges'] = {
+        'frameRanges': [],
+        'colors': []
+    }
+    state['timelineUpdatedRangesOptions'] = {
+        "pointerColor": "rgba(224,56,62,0)",
+        "height": "13px"
+    }
+
     data['timelineTags'] = None
 
     state['timelineOptions'] = {
@@ -23,6 +32,7 @@ def init_fields(state, data):
     state['selectedSoloMode'] = 'union'
 
     state['rangesToPlay'] = None
+    state['rangeToRemove'] = None
 
 
 def reverse_ranges(frames_ranges, frames_count):
@@ -86,3 +96,33 @@ def solo_mode_changed(api: sly.Api, task_id, context, state, app_logger, fields_
     tags_table = g.api.app.get_field(g.task_id, 'data.selectedTagsStats')
     ranges_to_play = get_ranges_to_play(state['selectedSoloMode'], tags_table)
     fields_to_update[f'state.rangesToPlay'] = ranges_to_play if len(ranges_to_play) > 0 else None
+
+
+@g.my_app.callback("remove_interval")
+@sly.timeit
+@g.update_fields
+@g.my_app.ignore_errors_and_show_dialog_window()
+def solo_mode_changed(api: sly.Api, task_id, context, state, app_logger, fields_to_update):
+    print(state)  ##state.rangeToRemove: {'tag': 'man in frame', 'value': 'True', 'range': {'interval': [124, 131]
+    fields_to_update['state.selectedTagMode'] = 'frames'
+    fields_to_update['state.copyFromPrevActivated'] = False
+
+    range_to_remove = state['rangeToRemove']
+
+    start_frame, end_frame = range_to_remove['range']['interval'][0], range_to_remove['range']['interval'][1]
+
+    for current_frame in range(start_frame, end_frame + 1, 1):
+        state['updatedTag'] = {
+            'name': range_to_remove['tag'],
+            'selected_value': ''
+        }
+        state['currentFrame'] = current_frame
+
+        f.process_updated_tag_locally(state)
+
+    f.update_tab_by_name('frames', state['currentFrame'])
+    f.update_user_stats(fields_to_update)
+
+    f.update_tags_on_timeline(fields_to_update)
+
+

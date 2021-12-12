@@ -37,6 +37,7 @@ def clean_values(api: sly.Api, task_id, context, state, app_logger, fields_to_up
 
     f.update_tab_by_name('frames', current_frame=state['currentFrame'])
     f.update_user_stats(fields_to_update)
+    f.update_tags_on_timeline(fields_to_update)
 
 
 @g.my_app.callback("tag_updated")
@@ -56,6 +57,7 @@ def tag_updated(api: sly.Api, task_id, context, state, app_logger, fields_to_upd
             f.update_tab_by_name('videos')
 
         f.update_user_stats(fields_to_update)
+        f.update_tags_on_timeline(fields_to_update)
 
 
 

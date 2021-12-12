@@ -3,7 +3,7 @@
 
         #action-recognition-labeling .disabled-background-fix .sly-card-disable-overlay {
 
-        border-radius: 18px;
+        <!--        border-radius: 18px;-->
 
         top: -18px;
         bottom: -18px;
@@ -13,8 +13,8 @@
         }
 
         #action-recognition-labeling .custom-sly-card-border-radius {
-        border-radius: 18px;
-        padding: 16px 20px;
+        <!--        border-radius: 18px;-->
+        <!--        padding: 16px 20px;-->
         }
 
         #action-recognition-labeling .beautiful-table {
@@ -103,6 +103,32 @@
 
         }
 
+
+        #action-recognition-labeling .tooltip-button-style {
+
+        display: flex;
+
+        flex-direction: row;
+        justify-content: center;
+        align-items: center;
+
+        height: 20px;
+        width: 72px;
+
+        border-radius: 6px;
+        margin: 0 6px;
+        font-weight: 400;
+
+        cursor: pointer;
+        transition: all 0.1s;
+
+        border: 1px solid #ff4949;
+
+<!--        background: #ff4949;-->
+        color: #ff4949;
+
+        }
+
         #action-recognition-labeling .black-to-gold-style {
         color: black;
 
@@ -128,8 +154,7 @@
     {% include 'src/ui/connect_to_controller.html' %}
 
 
-    <div style="height: fit-content;
-    display: flex;  flex-direction: row; justify-content: flex-start; align-items: stretch">
+    <div style="height: fit-content; display: flex;  flex-direction: row; justify-content: flex-start; align-items: stretch">
 
         <div id="left-visual-container"
              style="width: 60%; display: flex; flex-direction: column; align-items: flex-start; justify-content: flex-start;">

@@ -47,11 +47,12 @@ def return_item_to_controller(context, state):
 def finish_labeling(api: sly.Api, task_id, context, state, app_logger, fields_to_update):
     fields_to_update['state.buttonsLoading.finishLabeling'] = False
 
-    updated_tags = get_updated_tags_dict()
-    update_tags_ranges_locally(updated_tags)
+    updated_tags = f.get_updated_tags_dict()
+    f.update_tags_ranges_locally(updated_tags)
 
     update_job_stats(state, context, fields_to_update)
     upload_tags_to_supervisely(api, state['currentJobInfo']['videoId'], updated_tags)
+    reset_local_fields(fields_to_update)
 
     response = return_item_to_controller(context, state)
     f.set_available_mods_by_response(response, fields_to_update)
@@ -389,33 +390,6 @@ def convert_datetime_time_to_unix(datetime_time):
     return round((current_date - init_date).total_seconds())
 
 
-def get_updated_tags_dict():
-    updated_tags = {}
-
-    for tag_point, updated_combinations in g.updated_tags.items():
-
-        for updated_combination in updated_combinations:
-            if updated_combination['value'] is not None:
-                f.safe_dict_value_append(updated_tags, updated_combination['name'], updated_combination['value'])
-
-    for updated_tag in updated_tags.keys():
-        updated_tags[updated_tag] = list(set(updated_tags[updated_tag]))
-
-    return updated_tags
-
-
-def update_tags_ranges_locally(updated_tags):
-    for tag_name, tag_values in updated_tags.items():
-        for tag_value in tag_values:
-            try:
-                frames_list = g.tags2stats[tag_name][tag_value].get('framesList')
-                if frames_list is not None:
-                    frames_list = sorted(frames_list)
-                    f.get_frames_ranges_from_list(frames_list)
-                    g.tags2stats[tag_name][tag_value]['frameRanges'] = f.get_frames_ranges_from_list(frames_list)
-            except Exception:
-                pass
-
 
 def get_updated_user_stats(state):
     old_user_stats = g.api.task.get_field(task_id=g.task_id, field='data.userStats')
@@ -496,18 +470,18 @@ def reset_local_fields(fields_to_update):
 def save_annotations_manually(api: sly.Api, task_id, context, state, app_logger, fields_to_update):
     fields_to_update['state.buttonsLoading.saveAnn'] = False
 
-    updated_tags = get_updated_tags_dict()
-    update_tags_ranges_locally(updated_tags)
+    updated_tags = f.get_updated_tags_dict()
+    f.update_tags_ranges_locally(updated_tags)
 
     update_job_stats(state, context, fields_to_update)
     upload_tags_to_supervisely(api, state['currentJobInfo']['videoId'], updated_tags)
 
     tags_on_frames = f.get_tags_list_by_type('frame', g.video_id)  # update tags on timeline
     g.tags2stats = f.get_tags_stats(tags_on_frames)
-    tags_stats_in_table_form = f.tag_stats_to_table(g.tags2stats)
-    fields_to_update['data.selectedTagsStats'] = tags_stats_in_table_form
 
     reset_local_fields(fields_to_update)
 
     for current_tab_name in ['frames', 'videos']:
         f.update_tab_by_name(current_tab_name, current_frame=state['currentFrame'])
+
+    f.update_tags_on_timeline(fields_to_update)

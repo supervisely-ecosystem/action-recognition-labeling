@@ -23,14 +23,16 @@
                :frame.sync="state.currentFrame"
                :intervals="state.rangesToPlay"
                :disabled="state.videoInPlay"
+
                @update:frame="() => {
                    if (state.videoInPlay) return;
 
                    command('pointer_updated');
                    state.visibleChange=false;
                }"
+
                @play="state.videoInPlay=true; state.videoPlayedInterval[0]=state.currentFrame"
-               @pause="state.videoInPlay=false; state.videoPlayedInterval[1]=state.currentFrame; command('interval_played')"
+               @pause="state.videoInPlay=false; state.videoPlayedInterval[1]=state.currentFrame; command('interval_played');"
 
     ></sly-video>
 
