@@ -186,6 +186,7 @@ def get_frames_ranges_from_list(frames_list):
     prev_frame_index = -1
 
     for frame_index in frames_list:
+
         if first_frame_in_range is None:
             first_frame_in_range = frame_index
             prev_frame_index = frame_index
@@ -390,7 +391,6 @@ def get_tags_on_frame(tab_name, current_frame=0):
 
 
 def update_tab_by_name(tab_name, current_frame=0):
-
     tab_content, state_name = get_tags_on_frame(tab_name, current_frame)
     g.api.app.set_field(g.task_id, f'state.{state_name}', tab_content)
 
@@ -404,9 +404,8 @@ def update_user_stats(fields_to_update):
     # fields_to_update[f'data.userStats["Frames Annotated"]'] = get_unsaved_tags_count()
     # fields_to_update[f'data.userStats["Tags Created"]'] = get_unsaved_tags_count()
     fields_to_update[f'data.userStats["Unsaved Tags"]'] = len(g.user_stats['tags_created'] |
-                                                          g.user_stats['tags_changed'] |
-                                                          g.user_stats['tags_removed'])
-
+                                                              g.user_stats['tags_changed'] |
+                                                              g.user_stats['tags_removed'])
 
 
 def set_available_mods_by_response(response, fields_to_update):
@@ -483,7 +482,10 @@ def update_tags_on_timeline(fields_to_update):
     tags_stats_in_table_form = tag_stats_to_table(g.tags2stats)
     fields_to_update['data.selectedTagsStats'] = tags_stats_in_table_form  # update tags
 
-    updated_tags_ranges = get_frames_ranges_from_list(sorted(list(g.updated_tags.keys())))  # update changed tags line
+    updated_frames_indexes = [potential_frame_index for potential_frame_index in g.updated_tags.keys()
+                              if type(potential_frame_index) == int]
+
+    updated_tags_ranges = get_frames_ranges_from_list(sorted(list(updated_frames_indexes)))  # update changed tags line
     fields_to_update['state.updatedRanges'] = {
         'frameRanges': updated_tags_ranges,
         'colors': ["#f8ba29" for _ in range(len(updated_tags_ranges))]
