@@ -107,7 +107,11 @@ def get_new_item(api: sly.Api, task_id, context, state, app_logger, fields_to_up
     f.update_tab_by_name('frames')
     f.update_tab_by_name('videos')
 
-    fields_to_update['data.videoInfo'] = api.video.get_info_by_id(g.video_id)
+    video_info = api.video.get_info_by_id(g.video_id)
+
+    fields_to_update['data.videoInfo'] = {
+        'frames_count': video_info.frames_count
+    }
 
 
 def get_frame_ranges_for_every_annotated_tag(annotated_tags):
@@ -388,7 +392,6 @@ def convert_datetime_time_to_unix(datetime_time):
     current_date = datetime.datetime.strptime(datetime_time, '%H:%M:%S')
 
     return round((current_date - init_date).total_seconds())
-
 
 
 def get_updated_user_stats(state):
