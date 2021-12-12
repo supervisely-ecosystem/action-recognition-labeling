@@ -19,7 +19,7 @@ def init_fields(state, data):
     state['showAppModeSelector'] = False
 
     data["ssOptionsAnnotationController"] = {
-        "sessionTags": ["deployed_nn_embeddings"],
+        "sessionTags": ["labeling_jobs"],
         "showLabel": False,
         "size": "small"
     }
