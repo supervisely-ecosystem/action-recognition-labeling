@@ -14,6 +14,10 @@ def init_fields(state, data):
     state['videoInPlay'] = False
     state['videoPlayedInterval'] = [0, 0]
 
+    state['videoPlayerOptions'] = {
+        'intervalsNavigation': False
+    }
+
 
 @g.my_app.callback("pointer_updated")
 @sly.timeit

@@ -24,6 +24,8 @@
                :intervals="state.rangesToPlay"
                :disabled="state.videoInPlay"
 
+               :options="state.videoPlayerOptions"
+
                @update:frame="() => {
                    if (state.videoInPlay) return;
 

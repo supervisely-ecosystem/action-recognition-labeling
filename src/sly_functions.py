@@ -2,6 +2,7 @@ import datetime
 from string import Formatter
 
 import supervisely_lib as sly
+from itertools import chain
 
 import sly_globals as g
 from sly_fields_names import ItemsStatusField, UserStatsField
@@ -490,4 +491,42 @@ def update_tags_on_timeline(fields_to_update):
         'frameRanges': updated_tags_ranges,
         'colors': ["#f8ba29" for _ in range(len(updated_tags_ranges))]
     }
+
+
+def reverse_ranges(frames_ranges, frames_count):
+    all_frames = set([current_frame for current_frame in range(frames_count)])
+    filled_frames = get_frames_list_from_ranges(frames_ranges)
+
+    unfilled_frames = all_frames - set(filled_frames)
+    return get_frames_ranges_from_list(unfilled_frames)
+
+
+def get_ranges_to_play(solo_mode, tags_table):
+    raw_ranges = []
+
+    video_info = g.api.app.get_field(g.task_id, 'data.videoInfo')
+
+    for row in tags_table:
+        if row['solo_button']['stage'] == 1:  # tagged frames
+            raw_ranges.append(get_frames_list_from_ranges(row['frameRanges']))
+        elif row['solo_button']['stage'] == 2:  # untagged frames
+            reversed_ranges = reverse_ranges(row['frameRanges'], video_info['frames_count'])
+            raw_ranges.append(get_frames_list_from_ranges(reversed_ranges))
+
+    if len(raw_ranges) == 0:
+        return []
+
+    if solo_mode == 'union':
+        return get_frames_ranges_from_list(sorted(list(set(chain.from_iterable(raw_ranges)))))
+    elif solo_mode == 'intersection':
+        raw_ranges = list(map(set, raw_ranges))
+        return get_frames_ranges_from_list(sorted(list(set.intersection(*raw_ranges))))
+    else:
+        return -1
+
+
+def update_play_intervals_by_table(tags_table, play_mode, fields_to_update):
+    ranges_to_play = get_ranges_to_play(play_mode, tags_table)
+    fields_to_update[f'state.rangesToPlay'] = ranges_to_play if len(ranges_to_play) > 0 else None
+    fields_to_update[f'state.videoPlayerOptions.intervalsNavigation'] = True if len(ranges_to_play) > 0 else False
 
