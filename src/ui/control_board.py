@@ -323,8 +323,11 @@ def filter_by_tags_to_process(remote_tags_frames, remote_tags_video, tags_to_pro
 
     for current_tag in tags_to_process:
         if current_tag.frame_range is not None:  # FRAMES TAGS
-            filtered_frames_tags[current_tag.name][current_tag.value] = remote_tags_frames[current_tag.name][
-                current_tag.value]
+            try:
+                filtered_frames_tags[current_tag.name][current_tag.value] = remote_tags_frames[current_tag.name][
+                    current_tag.value]
+            except Exception as ex:  # DEBUG
+                sly.logger.warning(ex)
 
     updated_video_tags = g.updated_tags.get('video', [])
     for current_tag in updated_video_tags:
