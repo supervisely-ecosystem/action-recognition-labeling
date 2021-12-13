@@ -60,7 +60,7 @@
                             </el-button>
                         </div>
                     </div>
-                    <div style="max-height: calc(100% - 60px); overflow: auto;">
+                    <div style="height: calc(100% - 60px); overflow: auto;">
                         <div v-for="current_tag in state.tagsOnFrame">
                             <div style="padding-top: 2px; display: flex; flex-direction: row; align-items: center; justify-content: space-between">
                             <span style="padding-top: 2px; overflow-x: hidden; white-space: nowrap; text-overflow: ellipsis; font-size: 13px">
@@ -113,7 +113,7 @@
             <el-tab-pane label="VIDEO TAGS" name="videos">
 
                 <div v-if="state.tagsOnVideo.length > 0" style="height: 100%;">
-                    <div style="max-height: calc(100% - 12px); overflow: auto;">
+                    <div style="height: calc(100% - 12px); overflow: auto;">
                         <div v-for="current_tag in state.tagsOnVideo">
                             <div style="display: flex; flex-direction: row; align-items: center; justify-content: space-between"
                             >

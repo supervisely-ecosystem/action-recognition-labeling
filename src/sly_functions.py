@@ -490,4 +490,4 @@ def update_tags_on_timeline(fields_to_update):
         'frameRanges': updated_tags_ranges,
         'colors': ["#f8ba29" for _ in range(len(updated_tags_ranges))]
     }
-    print()
+
