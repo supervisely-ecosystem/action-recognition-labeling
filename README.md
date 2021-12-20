@@ -25,10 +25,9 @@
 Labeling Tool with convenient interface for action recognition labeling tasks.
 
 Application key points:
-- In-depth statistics for labeling jobs
-- Review labeling jobs done by annotators
-- Сheck the speed and quality of annotations
-- Analyze all labeling jobs in one application
+- One app for reviewing and annotating videos for Labeling Queues
+- Convenient UI for labeling videos for action recognition tasks
+- Copy mode for fast labeling
 
 
 # How to Run
