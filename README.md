@@ -22,7 +22,7 @@
 
 # Overview
 
-Application creates table with statistics about selected video project.
+Labeling Tool with convenient interface for action recognition labeling tasks.
 
 Application key points:
 - In-depth statistics for labeling jobs
@@ -36,7 +36,7 @@ Application key points:
 ### 1. Add [Action Recognition Labeling Tool](https://ecosystem.supervise.ly/apps/action-recognition-labeling) to your team from Ecosystem.
 <img data-key="sly-module-link" data-module-slug="supervisely-ecosystem/action-recognition-labeling" src="https://i.imgur.com/D72gmm6.png" width="450px" style='padding-bottom: 20px'/>  
 
-### 2. Run app from the context menu of Supervisely Videos project:
+### 2. Run app from the Plugins & Apps page:
 <img src="https://i.imgur.com/ju65j82.png"/>
 
 
@@ -45,16 +45,21 @@ Application key points:
 1. After running the application, you will be redirected to the `Tasks` page. Wait until the app is started and press `Open` button
 <img src="https://i.imgur.com/QJxQewW.png" width="100%"/>
 
-2. Download stats for video project
+2. Select active **Labeling Queues** application session
+3. Connect to **Labeling Queues**
 <img src="https://i.imgur.com/O6KNSv6.png" width="100%"/>
 
-3. Select video
+4. Press **Get Video** button to load video from active Labeling Queues session to Labeling Tool
 <img src="https://i.imgur.com/BzUXXiF.png" width="100%"/>
 
-4. Review stats for selected video
-<img src="https://i.imgur.com/v2bhjsX.png" width="100%"/>
+5. Select mode
+6. Select `Tag`
+7. Click on the Timeline or use video player buttons to annotate
+8. Save annotations
+9. Finish labeling for the current video
+<img src="https://i.imgur.com/z83cGhj.png" width="100%"/>
 
-5. Review stats for selected video
+10. Press **Get Video** button to load next video to Labeling Tool
 <img src="https://i.imgur.com/YFc3osa.png" width="100%"/>
 
 
