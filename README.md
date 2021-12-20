@@ -1,5 +1,5 @@
 <div align="center" markdown>
-<img src=""/>
+<img src="https://i.imgur.com/BzplEb0.jpg"/>
 
 
 # Action Recognition Labeling Tool
