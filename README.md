@@ -47,6 +47,6 @@ Before start you need to launch next Supervisely Applications ⬇️
   <img data-key="sly-module-link" data-module-slug="supervisely-ecosystem/labeling-queues" src="https://imgur.com/nC3Oofo.png" width="350px" style='padding-bottom: 20px'/>
 
 # Demo Video
-<a data-key="sly-embeded-video-link" href="" data-video-code="">
+<a data-key="sly-embeded-video-link" href="https://youtu.be/PjbHHVPQJII" data-video-code="PjbHHVPQJII">
     <img src="" alt="SLY_EMBEDED_VIDEO_LINK"  width="70%">
 </a>
