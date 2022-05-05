@@ -4,19 +4,15 @@
   "categories": [
     "labeling"
   ],
-
   "description": "Label videos for Action Recognition task",
   "docker_image": "supervisely/base-py-sdk:6.3.0",
   "main_script": "src/main.py",
   "gui_template": "src/gui.html",
   "task_location": "workspace_tasks",
-
   "need_gpu": false,
-  
   "icon": "https://imgur.com/BJVjHij.png",
   "icon_cover": false,
   "icon_background": "#FFFFFF",
-
-  "instance_version": "6.4.21"
-
+  "instance_version": "6.4.21",
+  "poster": "https://imgur.com/qgytUat.png"
 }
