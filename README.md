@@ -1,5 +1,5 @@
 <div align="center" markdown>
-<img src="https://imgur.com/qgytUat.png"/>
+<img src="media/68747470733a2f2f696d6775722e636f6d2f716779745561742e706e67.png"/>
 
 
 # Action Recognition Labeling Tool
@@ -32,10 +32,10 @@ Application key points:
 # How to Run
 
 ### 1. Add [Action Recognition Labeling Tool](https://ecosystem.supervise.ly/apps/action-recognition-labeling) to your team from Ecosystem.
-<img data-key="sly-module-link" data-module-slug="supervisely-ecosystem/action-recognition-labeling" src="https://i.imgur.com/D72gmm6.png" width="350px" style='padding-bottom: 20px'/>  
+<img data-key="sly-module-link" data-module-slug="supervisely-ecosystem/action-recognition-labeling" src="media/68747470733a2f2f692e696d6775722e636f6d2f443732676d6d362e706e67.png" width="350px" style='padding-bottom: 20px'/>  
 
 ### 2. Run app from the Plugins & Apps page:
-<img src="https://imgur.com/0v8anvb.png"/>
+<img src="media/68747470733a2f2f696d6775722e636f6d2f307638616e76622e706e67.png"/>
 
 
 # Common apps
@@ -43,7 +43,7 @@ Application key points:
 Before start you need to launch next Supervisely Applications ⬇️
   
 - [Classic Labeling Queues](https://ecosystem.supervise.ly/apps/labeling-queues) — use this Application to initialize Annotation Process   
-  <img data-key="sly-module-link" data-module-slug="supervisely-ecosystem/labeling-queues" src="https://imgur.com/nC3Oofo.png" width="350px" style='padding-bottom: 20px'/>
+  <img data-key="sly-module-link" data-module-slug="supervisely-ecosystem/labeling-queues" src="media/68747470733a2f2f696d6775722e636f6d2f6e43334f6f666f2e706e67.png" width="350px" style='padding-bottom: 20px'/>
 
 # Demo
 <a data-key="sly-embeded-video-link" href="https://youtu.be/PjbHHVPQJII" data-video-code="PjbHHVPQJII">
