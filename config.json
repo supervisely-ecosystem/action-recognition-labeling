@@ -6,7 +6,7 @@
     "labeling"
   ],
   "description": "Label videos for Action Recognition task",
-  "docker_image": "supervisely/base-py-sdk:6.35.0",
+  "docker_image": "supervisely/base-py-sdk:6.72.55",
   "main_script": "src/main.py",
   "gui_template": "src/gui.html",
   "task_location": "workspace_tasks",
