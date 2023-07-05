@@ -11,9 +11,9 @@
   "gui_template": "src/gui.html",
   "task_location": "workspace_tasks",
   "need_gpu": false,
-  "icon": "https://imgur.com/BJVjHij.png",
+  "icon": "media/icon.png",
   "icon_cover": false,
   "icon_background": "#FFFFFF",
   "instance_version": "6.4.21",
-  "poster": "https://imgur.com/qgytUat.png"
+  "poster": "media/68747470733a2f2f696d6775722e636f6d2f716779745561742e706e67.png"
 }
