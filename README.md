@@ -47,5 +47,5 @@ Before start you need to launch next Supervisely Applications ⬇️
 
 # Demo
 <a data-key="sly-embeded-video-link" href="https://youtu.be/PjbHHVPQJII" data-video-code="PjbHHVPQJII">
-    <img src="https://imgur.com/bTrVogG.png" alt="SLY_EMBEDED_VIDEO_LINK"  width="70%">
+    <img src="media/demo.png" alt="SLY_EMBEDED_VIDEO_LINK"  width="70%">
 </a>
