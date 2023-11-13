@@ -1,7 +1,5 @@
 import supervisely as sly
 
-from supervisely import handle_exceptions
-
 import sly_globals as g
 import sly_functions as f
 
@@ -36,7 +34,6 @@ def init_fields(state, data):
 @sly.timeit
 @g.update_fields
 @g.my_app.ignore_errors_and_show_dialog_window()
-@handle_exceptions
 def solo_button_clicked(api: sly.Api, task_id, context, state, app_logger, fields_to_update):
     button_stats = state['selectedTimelineRow']
     next_stage = (button_stats['soloButtonStage'] + 1) % len(f.solo_button_stages)
@@ -56,7 +53,6 @@ def solo_button_clicked(api: sly.Api, task_id, context, state, app_logger, field
 @sly.timeit
 @g.update_fields
 @g.my_app.ignore_errors_and_show_dialog_window()
-@handle_exceptions
 def solo_mode_changed(api: sly.Api, task_id, context, state, app_logger, fields_to_update):
     tags_table = g.api.app.get_field(g.task_id, 'data.selectedTagsStats')
     f.update_play_intervals_by_table(tags_table, state['selectedSoloMode'], fields_to_update)
@@ -66,7 +62,6 @@ def solo_mode_changed(api: sly.Api, task_id, context, state, app_logger, fields_
 @sly.timeit
 @g.update_fields
 @g.my_app.ignore_errors_and_show_dialog_window()
-@handle_exceptions
 def solo_mode_changed(api: sly.Api, task_id, context, state, app_logger, fields_to_update):
     print(state)  ##state.rangeToRemove: {'tag': 'man in frame', 'value': 'True', 'range': {'interval': [124, 131]
     fields_to_update['state.selectedTagMode'] = 'frames'

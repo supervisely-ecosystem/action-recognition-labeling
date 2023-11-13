@@ -5,7 +5,6 @@ import sly_functions as f
 
 from sly_fields_names import UserStatsField
 
-from supervisely import handle_exceptions
 
 def init_fields(state, data):
     state['userMode'] = None
@@ -48,7 +47,6 @@ def init_fields(state, data):
 @sly.timeit
 @g.update_fields
 @g.my_app.ignore_errors_and_show_dialog_window()
-@handle_exceptions
 def connect_to_controller(api: sly.Api, task_id, context, state, app_logger, fields_to_update):
     task_id = state['annControllerId']
     fields_to_update['state.connectingAnnotationController'] = False

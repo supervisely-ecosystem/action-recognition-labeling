@@ -26,7 +26,6 @@ def main():
 @g.my_app.callback("is_online")
 @sly.timeit
 @g.update_fields
-@handle_exceptions
 def is_online(api: sly.Api, task_id, context, state, app_logger, fields_to_update):
     try:
         request_id = context["request_id"]
