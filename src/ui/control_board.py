@@ -71,9 +71,9 @@ def get_video_from_controller(api, state, context, fields_to_update):
 
     if response["item_id"] is None:
         if state['userMode'] == 'annotator':
-            g.my_app.show_modal_window("No more videos in queue to annotate", "warning")
+            g.my_app.show_modal_window("No videos in queue to annotate", "warning")
         elif state['userMode'] == 'reviewer':
-            g.my_app.show_modal_window("No more videos in queue to review", "warning")
+            g.my_app.show_modal_window("No videos in queue to review", "warning")
         return False
 
     current_job_fields_to_update = {
