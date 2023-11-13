@@ -1,11 +1,9 @@
-import ast
-import json
-import time
+import supervisely as sly
+
+from supervisely import handle_exceptions
 
 import sly_globals as g
 import sly_functions as f
-import supervisely_lib as sly
-
 
 def init_fields(state, data):
     state['currentFrame'] = 0
@@ -23,6 +21,7 @@ def init_fields(state, data):
 @sly.timeit
 @g.update_fields
 @g.my_app.ignore_errors_and_show_dialog_window()
+@handle_exceptions
 def pointer_updated(api: sly.Api, task_id, context, state, app_logger, fields_to_update):
     fields_to_update['state.selectedTagMode'] = 'frames'
 
@@ -41,6 +40,7 @@ def pointer_updated(api: sly.Api, task_id, context, state, app_logger, fields_to
 @sly.timeit
 @g.update_fields
 @g.my_app.ignore_errors_and_show_dialog_window()
+@handle_exceptions
 def pointer_updated(api: sly.Api, task_id, context, state, app_logger, fields_to_update):
     fields_to_update['state.selectedTagMode'] = 'frames'
     fields_to_update['state.copyFromPrevActivated'] = False

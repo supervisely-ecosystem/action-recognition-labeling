@@ -1,18 +1,16 @@
-import ast
-import json
 import time
 import datetime
 
-import timeline
-from supervisely_lib.video_annotation.video_tag import VideoTag
-from supervisely_lib.video_annotation.video_tag_collection import VideoTagCollection
+from supervisely import handle_exceptions
+from supervisely.video_annotation.video_tag import VideoTag
+from supervisely.video_annotation.video_tag_collection import VideoTagCollection
 
 from sly_fields_names import UserStatsField
 
 import labeling_tool
 import sly_globals as g
 import sly_functions as f
-import supervisely_lib as sly
+import supervisely as sly
 
 
 def init_fields(state, data):
@@ -44,6 +42,7 @@ def return_item_to_controller(context, state):
 @sly.timeit
 @g.update_fields
 @g.my_app.ignore_errors_and_show_dialog_window()
+@handle_exceptions
 def finish_labeling(api: sly.Api, task_id, context, state, app_logger, fields_to_update):
     fields_to_update['state.buttonsLoading.finishLabeling'] = False
 
@@ -90,6 +89,7 @@ def get_video_from_controller(api, state, context, fields_to_update):
 @sly.timeit
 @g.update_fields
 @g.my_app.ignore_errors_and_show_dialog_window()
+@handle_exceptions
 def get_new_item(api: sly.Api, task_id, context, state, app_logger, fields_to_update):
     fields_to_update['state.buttonsLoading.getItem'] = False
 
@@ -473,6 +473,7 @@ def reset_local_fields(fields_to_update):
 @sly.timeit
 @g.update_fields
 # @g.my_app.ignore_errors_and_show_dialog_window()
+@handle_exceptions
 def save_annotations_manually(api: sly.Api, task_id, context, state, app_logger, fields_to_update):
     fields_to_update['state.buttonsLoading.saveAnn'] = False
 

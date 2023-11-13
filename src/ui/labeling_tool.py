@@ -1,10 +1,8 @@
-import ast
-import json
-import time
+from supervisely import handle_exceptions
 
 import sly_globals as g
 import sly_functions as f
-import supervisely_lib as sly
+import supervisely as sly
 
 
 def init_fields(state, data):
@@ -25,6 +23,7 @@ def init_fields(state, data):
 @sly.timeit
 @g.update_fields
 # @g.my_app.ignore_errors_and_show_dialog_window()
+@handle_exceptions
 def clean_values(api: sly.Api, task_id, context, state, app_logger, fields_to_update):
     fields_to_update['state.buttonsLoading.cleanAllValues'] = False
 
@@ -44,6 +43,7 @@ def clean_values(api: sly.Api, task_id, context, state, app_logger, fields_to_up
 @sly.timeit
 @g.update_fields
 # @g.my_app.ignore_errors_and_show_dialog_window()
+@handle_exceptions
 def tag_updated(api: sly.Api, task_id, context, state, app_logger, fields_to_update):
     if state['updatedTag'].get('selected_value', None) is not None and state['visibleChange']:
         fields_to_update['state.visibleChange'] = False

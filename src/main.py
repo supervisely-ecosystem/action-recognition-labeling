@@ -1,10 +1,12 @@
-import supervisely_lib as sly
+import supervisely as sly
+from supervisely import handle_exceptions
 import ui.ui as ui
 
 import sly_globals as g
 import sly_functions as f
 
 
+@handle_exceptions
 def main():
     sly.logger.info("Script arguments", extra={
         "context.teamId": g.team_id,
@@ -24,6 +26,7 @@ def main():
 @g.my_app.callback("is_online")
 @sly.timeit
 @g.update_fields
+@handle_exceptions
 def is_online(api: sly.Api, task_id, context, state, app_logger, fields_to_update):
     try:
         request_id = context["request_id"]
