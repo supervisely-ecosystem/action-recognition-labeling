@@ -1,6 +1,3 @@
-import ast
-import json
-
 import sly_globals as g
 import supervisely_lib as sly
 

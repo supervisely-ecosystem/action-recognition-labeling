@@ -1,13 +1,7 @@
-import ast
-import json
-import time
-
+import supervisely as sly
 
 import sly_globals as g
 import sly_functions as f
-import supervisely_lib as sly
-
-from functools import lru_cache
 
 
 def init_fields(state, data):

@@ -1,18 +1,15 @@
-import ast
-import json
 import time
 import datetime
 
-import timeline
-from supervisely_lib.video_annotation.video_tag import VideoTag
-from supervisely_lib.video_annotation.video_tag_collection import VideoTagCollection
+from supervisely.video_annotation.video_tag import VideoTag
+from supervisely.video_annotation.video_tag_collection import VideoTagCollection
 
 from sly_fields_names import UserStatsField
 
 import labeling_tool
 import sly_globals as g
 import sly_functions as f
-import supervisely_lib as sly
+import supervisely as sly
 
 
 def init_fields(state, data):
@@ -72,6 +69,13 @@ def get_video_from_controller(api, state, context, fields_to_update):
 
     response = api.task.send_request(annotation_controller_id, "get_item", data=data_to_send, timeout=10)
 
+    if response["item_id"] is None:
+        if state['userMode'] == 'annotator':
+            g.my_app.show_modal_window("No videos in queue to annotate", "warning")
+        elif state['userMode'] == 'reviewer':
+            g.my_app.show_modal_window("No videos in queue to review", "warning")
+        return False
+
     current_job_fields_to_update = {
         'isStarted': True,
         'startTime': time.time(),
@@ -84,6 +88,7 @@ def get_video_from_controller(api, state, context, fields_to_update):
 
     g.video_id = response['item_id']
     g.project_meta = sly.ProjectMeta.from_json(f.get_project_meta(api, g.video_id))
+    return True
 
 
 @g.my_app.callback("get_new_item")
@@ -93,26 +98,27 @@ def get_video_from_controller(api, state, context, fields_to_update):
 def get_new_item(api: sly.Api, task_id, context, state, app_logger, fields_to_update):
     fields_to_update['state.buttonsLoading.getItem'] = False
 
-    get_video_from_controller(api, state, context, fields_to_update)  # call controller part
+    has_videos_in_queue = get_video_from_controller(api, state, context, fields_to_update)  # call controller part
+    if has_videos_in_queue:
+        tags_on_frames = f.get_tags_list_by_type('frame', g.video_id)  # frames tags part
+        g.tags2stats = f.get_tags_stats(tags_on_frames)
 
-    tags_on_frames = f.get_tags_list_by_type('frame', g.video_id)  # frames tags part
-    g.tags2stats = f.get_tags_stats(tags_on_frames)
+        tags_stats_in_table_form = f.tag_stats_to_table(g.tags2stats)
+        fields_to_update['data.selectedTagsStats'] = tags_stats_in_table_form
 
-    tags_stats_in_table_form = f.tag_stats_to_table(g.tags2stats)
-    fields_to_update['data.selectedTagsStats'] = tags_stats_in_table_form
+        tags_on_video = f.get_tags_list_by_type('video', g.video_id)  # videos tags part
+        g.video_tags = {current_tag['name']: current_tag['value'] for current_tag in tags_on_video}
 
-    tags_on_video = f.get_tags_list_by_type('video', g.video_id)  # videos tags part
-    g.video_tags = {current_tag['name']: current_tag['value'] for current_tag in tags_on_video}
+        f.update_tab_by_name('frames')
+        f.update_tab_by_name('videos')
 
-    f.update_tab_by_name('frames')
-    f.update_tab_by_name('videos')
+        video_info = api.video.get_info_by_id(g.video_id)
 
-    video_info = api.video.get_info_by_id(g.video_id)
-
-    fields_to_update['data.videoInfo'] = {
-        'frames_count': video_info.frames_count
-    }
-
+        fields_to_update['data.videoInfo'] = {
+            'frames_count': video_info.frames_count
+        }
+    else:
+        fields_to_update['state.buttonsLoading.getItem'] = False
 
 def get_frame_ranges_for_every_annotated_tag(annotated_tags):
     unique_names = list(set([current_tag['name'] for current_tag in annotated_tags]))

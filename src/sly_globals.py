@@ -12,8 +12,9 @@ import sly_functions as f
 
 from dotenv import load_dotenv  # pip install python-dotenv\
 
-load_dotenv("../debug.env")
-load_dotenv("../secret_debug.env", override=True)
+if sly.is_development():
+    load_dotenv("../debug.env")
+    load_dotenv("../secret_debug.env", override=True)
 
 sly.logger.setLevel('DEBUG')
 
