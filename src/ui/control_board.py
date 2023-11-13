@@ -71,6 +71,13 @@ def get_video_from_controller(api, state, context, fields_to_update):
 
     response = api.task.send_request(annotation_controller_id, "get_item", data=data_to_send, timeout=10)
 
+    if response["item_id"] is None:
+        if state['userMode'] == 'annotator':
+            sly.app.show_dialog(title="Warning", message="No more videos in queue to annotate", status="warning")
+        elif state['userMode'] == 'reviewer':
+            sly.app.show_dialog(title="Warning", message="No more videos in queue to review", status="warning")
+        return
+
     current_job_fields_to_update = {
         'isStarted': True,
         'startTime': time.time(),
