@@ -71,10 +71,9 @@ def get_video_from_controller(api, state, context, fields_to_update):
 
     if response["item_id"] is None:
         if state['userMode'] == 'annotator':
-            sly.app.show_dialog(title="Warning", description="No more videos in queue to annotate", status="warning")
+            raise Exception("No more videos in queue to annotate")
         elif state['userMode'] == 'reviewer':
-            sly.app.show_dialog(title="Warning", description="No more videos in queue to review", status="warning")
-        return
+            raise Exception("No more videos in queue to review")
 
     current_job_fields_to_update = {
         'isStarted': True,
