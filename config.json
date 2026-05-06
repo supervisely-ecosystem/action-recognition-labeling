@@ -11,6 +11,6 @@
   "icon": "https://imgur.com/BJVjHij.png",
   "icon_cover": false,
   "icon_background": "#FFFFFF",
-  "min_instance_version": "6.8.48",
+  "instance_version": "6.15.60",
   "poster": "https://imgur.com/qgytUat.png"
 }
