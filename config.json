@@ -3,7 +3,7 @@
   "type": "app",
   "categories": ["videos", "labeling"],
   "description": "Label videos for Action Recognition task",
-  "docker_image": "supervisely/labeling:6.72.182",
+  "docker_image": "supervisely/labeling:6.73.564",
   "main_script": "src/main.py",
   "gui_template": "src/gui.html",
   "task_location": "workspace_tasks",
