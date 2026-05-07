@@ -1,7 +1,7 @@
 import datetime
 from string import Formatter
 
-import supervisely_lib as sly
+import supervisely as sly
 from itertools import chain
 
 import sly_globals as g

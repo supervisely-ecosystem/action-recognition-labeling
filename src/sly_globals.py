@@ -5,7 +5,7 @@ from pathlib import Path
 import sys
 import pickle
 
-import supervisely_lib as sly
+import supervisely as sly
 from sly_fields_names import ItemsStatusField
 
 import sly_functions as f
