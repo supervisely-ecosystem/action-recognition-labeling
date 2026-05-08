@@ -1,9 +1,12 @@
 {
   "name": "Action Recognition Labeling Tool",
   "type": "app",
-  "categories": ["videos", "labeling"],
+  "categories": [
+    "videos",
+    "labeling"
+  ],
   "description": "Label videos for Action Recognition task",
-  "docker_image": "supervisely/labeling:6.72.182",
+  "docker_image": "supervisely/base-py-sdk:6.73.564",
   "main_script": "src/main.py",
   "gui_template": "src/gui.html",
   "task_location": "workspace_tasks",
@@ -11,6 +14,6 @@
   "icon": "https://imgur.com/BJVjHij.png",
   "icon_cover": false,
   "icon_background": "#FFFFFF",
-  "min_instance_version": "6.8.48",
+  "instance_version": "6.15.60",
   "poster": "https://imgur.com/qgytUat.png"
 }
